@@ -60,7 +60,7 @@
         android:textAlignment="center"
         android:textColor="#000000"
         android:textColorHint="#00000000"
-        android:textSize="28sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,12 +71,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
         android:text="Accelerometer Data (m/s-2)"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appName" />
 
@@ -90,7 +90,7 @@
         android:text="Ax:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/accelerometerTitle" />
 
@@ -98,64 +98,64 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="35dp"
         android:fontFamily="@font/roboto"
         android:text="Ay:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
-        android:textSize="18sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/accelerationX"
-        app:layout_constraintStart_toEndOf="@+id/accelerationX" />
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/axLabel"
+        app:layout_constraintStart_toEndOf="@+id/axLabel" />
 
     <TextView
         android:id="@+id/textView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="35dp"
         android:fontFamily="@font/roboto"
         android:text="Az:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
-        android:textSize="18sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/accelerationY"
-        app:layout_constraintStart_toEndOf="@+id/accelerationY" />
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/ayLabel"
+        app:layout_constraintStart_toEndOf="@+id/ayLabel" />
 
     <TextView
-        android:id="@+id/accelerationX"
-        android:layout_width="wrap_content"
+        android:id="@+id/axLabel"
+        android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="9.875"
+        android:text="-9.875"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/textView5"
         app:layout_constraintStart_toEndOf="@+id/textView5" />
 
     <TextView
-        android:id="@+id/accelerationY"
-        android:layout_width="wrap_content"
+        android:id="@+id/ayLabel"
+        android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="9.875"
+        android:text="-9.875"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
         app:layout_constraintStart_toEndOf="@+id/textView6" />
 
     <TextView
-        android:id="@+id/accelerationZ"
-        android:layout_width="wrap_content"
+        android:id="@+id/azLabel"
+        android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="9.875"
+        android:text="-9.875"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/textView7"
         app:layout_constraintStart_toEndOf="@+id/textView7" />
 
@@ -164,12 +164,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="65dp"
         android:fontFamily="@font/roboto"
         android:text="Gyroscope Data (rad/s)"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/accelerometerTitle" />
 
@@ -178,12 +178,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="65dp"
         android:fontFamily="@font/roboto"
         android:text="Device Orientation (rad)"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gyroscopeTitle" />
 
@@ -192,12 +192,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="65dp"
         android:fontFamily="@font/roboto"
         android:text="WiFi Information Data"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/deviceOrientationTitle" />
 
@@ -206,12 +206,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="65dp"
         android:fontFamily="@font/roboto"
         android:text="Pedometer Data"
         android:textAlignment="textStart"
         android:textColor="#000000"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/wifiInformationTitle" />
 
@@ -219,8 +219,8 @@
         android:id="@+id/imageView1"
         android:layout_width="65dp"
         android:layout_height="35dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/sfu_logo" />
@@ -230,7 +230,7 @@
         android:layout_width="74dp"
         android:layout_height="38dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/gruvi_logo" />
