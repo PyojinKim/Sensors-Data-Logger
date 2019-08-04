@@ -12,17 +12,28 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+import java.security.KeyException;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    //
+    private static final String LOG_TAG = MainActivity.class.getName();
+
     private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
+    private HashMap<String, Sensor> mSensors = new HashMap<>();
+
+    private AtomicBoolean mIsRecording = new AtomicBoolean(false);
+    private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
+
+    private float[] mGyroBias = new float[3];
+    private float[] mMagnetBias = new float[3];
+    private float[] mAcceBias = new float[3];
 
     private long timestamp;
-    private float rawAccelDataX, rawAccelDataY, rawAccelDataZ;
-    private TextView axLabel, ayLabel, azLabel;
-
-    private static final String TAG = "MainActivity";
+    private float rawAccelDataX, rawAccelDataY, rawAccelDataZ, rawGyroDataX, rawGyroDataY, rawGyroDataZ;
+    private TextView axLabel, ayLabel, azLabel, wxLabel, wyLabel, wzLabel, rxLabel, ryLabel, rzLabel;
 
 
     @Override
@@ -31,72 +42,109 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         initializeViews();
 
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-
-            mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-        } else {
-
-        }
-
-
+        // setup sensors' configuration
+        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+        mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        mSensors.put("gyro", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
     }
 
-    public void initializeViews() {
+    private void initializeViews() {
         axLabel = (TextView) findViewById(R.id.axLabel);
         ayLabel = (TextView) findViewById(R.id.ayLabel);
         azLabel = (TextView) findViewById(R.id.azLabel);
+
+        wxLabel = (TextView) findViewById(R.id.wxLabel);
+        wyLabel = (TextView) findViewById(R.id.wyLabel);
+        wzLabel = (TextView) findViewById(R.id.wzLabel);
+
+        rxLabel = (TextView) findViewById(R.id.rxLabel);
+        ryLabel = (TextView) findViewById(R.id.ryLabel);
+        rzLabel = (TextView) findViewById(R.id.rzLabel);
     }
 
-    // onResume() register the accelerometer for listening the events
+    private void registerSensors() {
+        for (Sensor eachSensor : mSensors.values()) {
+            mSensorManager.registerListener(this, eachSensor, SensorManager.SENSOR_DELAY_GAME);
+        }
+    }
+
+    private void unregisterSensors() {
+        for (Sensor eachSensor : mSensors.values()) {
+            mSensorManager.unregisterListener(this, eachSensor);
+        }
+    }
+
+
+    @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+        registerSensors();
     }
 
-    // onPause() unregister the accelerometer for stop listening the events
+
+    @Override
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+        unregisterSensors();
     }
+
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+
+        // update each sensor measurements
+        timestamp = sensorEvent.timestamp;
+        Sensor eachSensor = sensorEvent.sensor;
+        try {
+            if (eachSensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                rawAccelDataX = sensorEvent.values[0];
+                rawAccelDataY = sensorEvent.values[1];
+                rawAccelDataZ = sensorEvent.values[2];
+
+                axLabel.setText(String.format("%.3f", rawAccelDataX));
+                ayLabel.setText(String.format("%.3f", rawAccelDataY));
+                azLabel.setText(String.format("%.3f", rawAccelDataZ));
+            } else if (eachSensor.getType() == Sensor.TYPE_GYROSCOPE) {
+                rawGyroDataX = sensorEvent.values[0];
+                rawGyroDataY = sensorEvent.values[1];
+                rawGyroDataZ = sensorEvent.values[2];
+
+                wxLabel.setText(String.format("%.3f", rawGyroDataX));
+                wyLabel.setText(String.format("%.3f", rawGyroDataY));
+                wzLabel.setText(String.format("%.3f", rawGyroDataZ));
+            } else {
+
+            }
+        } catch (Exception e) {
+            Log.d(LOG_TAG, "onSensorChanged: Something is wrong.");
+        }
+
+
+
+        Log.d(LOG_TAG, "onSensorChanged: " + timestamp);
+
+
+
+
+    }
+
+    private void displayCleanValues() {
+        axLabel.setText("0.0");
+        ayLabel.setText("0.0");
+        azLabel.setText("0.0");
+
+        wxLabel.setText("0.0");
+        wyLabel.setText("0.0");
+        wzLabel.setText("0.0");
+
+        rxLabel.setText("0.0");
+        ryLabel.setText("0.0");
+        rzLabel.setText("0.0");
+    }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-
-        // clean and update current accelerometer measurements
-        displayCleanValues();
-
-        timestamp = sensorEvent.timestamp;
-        rawAccelDataX = sensorEvent.values[0];
-        rawAccelDataY = sensorEvent.values[1];
-        rawAccelDataZ = sensorEvent.values[2];
-
-        axLabel.setText(String.format("%.3f", rawAccelDataX));
-        ayLabel.setText(String.format("%.3f", rawAccelDataY));
-        azLabel.setText(String.format("%.3f", rawAccelDataZ));
-
-        Log.d(TAG, "onSensorChanged: " + timestamp);
-
-
-
-    }
-
-    public void displayCleanValues() {
-        axLabel.setText("0.0");
-        ayLabel.setText("0.0");
-        azLabel.setText("0.0");
-    }
-
-
-
-
-
-
-
 }
