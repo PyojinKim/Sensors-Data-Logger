@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private static final String LOG_TAG = MainActivity.class.getName();
+    private final static String LOG_TAG = MainActivity.class.getName();
 
     private SensorManager mSensorManager;
     private HashMap<String, Sensor> mSensors = new HashMap<>();
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private long timestamp;
     private float rawAccelDataX, rawAccelDataY, rawAccelDataZ, rawGyroDataX, rawGyroDataY, rawGyroDataZ;
-    private TextView axLabel, ayLabel, azLabel, wxLabel, wyLabel, wzLabel, rxLabel, ryLabel, rzLabel;
+    private TextView axLabel, ayLabel, azLabel, wxLabel, wyLabel, wzLabel, rxLabel, ryLabel, rzLabel, mxLabel, myLabel, mzLabel;
 
 
     @Override
