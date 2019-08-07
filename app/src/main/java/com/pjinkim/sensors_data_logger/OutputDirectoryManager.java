@@ -10,12 +10,13 @@ import java.util.Calendar;
 
 public class OutputDirectoryManager {
 
+    // properties
     private final static String LOG_TAG = OutputDirectoryManager.class.getName();
 
     private String mOutputDirectory;
 
 
-    // multiple constructors
+    // constructors
     public OutputDirectoryManager(final String prefix, final String suffix) throws FileNotFoundException {
         update(prefix, suffix);
     }
@@ -29,7 +30,7 @@ public class OutputDirectoryManager {
     }
 
 
-    // update functions for multiple constructors
+    // methods
     private void update(final String prefix, final String suffix) throws FileNotFoundException {
 
         // initialize folder name with current time information

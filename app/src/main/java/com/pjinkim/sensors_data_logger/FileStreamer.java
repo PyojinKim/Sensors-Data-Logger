@@ -16,17 +16,22 @@ import java.util.Locale;
 
 public class FileStreamer {
 
+    // properties
     private final static String LOG_TAG = FileStreamer.class.getName();
 
     private Context mContext;
     private HashMap<String, BufferedWriter> mFileWriters = new HashMap<>();
     private String mOutputFolder;
 
+
+    // constructor
     public FileStreamer(Context mContext, final String mOutputFolder) {
         this.mContext = mContext;
         this.mOutputFolder = mOutputFolder;
     }
 
+
+    // methods
     public void addFile(final String writerId, final String fileName) throws IOException {
 
         // check if there is a already generated text file
