@@ -3,9 +3,11 @@ package com.pjinkim.sensors_data_logger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +17,6 @@ import java.security.KeyException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Handler;
 
 public class WifiSession implements Runnable {
     public interface WifiScannerCallback {
@@ -79,18 +80,6 @@ public class WifiSession implements Runnable {
 
 
     // methods
-    public void stopSession() {
-
-        if (mIsWritingFile.get()) {
-            try {
-                mFileStreamer
-            }
-        }
-    }
-
-
-
-
     public void startSession(final String streamFolder) {
 
         // check wifi hardware is turned on
@@ -99,14 +88,62 @@ public class WifiSession implements Runnable {
             return;
         }
 
+        // initialize text file stream
         mIsRunning.set(true);
+        mContext.registerReceiver(mScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        if (streamFolder != null) {
+            try {
+                mFileStreamer = new WifiResultStreamer(mContext, streamFolder);
+                mIsWritingFile.set(true);
+            } catch (IOException e) {
+                mContext.showToast("Cannot create file for Wifi scans");
+                e.printStackTrace();
+            }
+        }
+        run();
     }
 
 
+    public void stopSession() {
+
+        // close text file and reset variables
+        if (mIsWritingFile.get()) {
+            try {
+                mFileStreamer.endFiles();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        mIsWritingFile.set(false);
+        mIsRunning.set(false);
+        mNumScans.set(0);
+        mContext.unregisterReceiver(mScanReceiver);
+        mHandler.removeCallbacks(null);
+    }
 
 
+    public void singleScan() {
+        if (mWifiManager.startScan()) {
+            Log.i(LOG_TAG, "singleScan: Scan request sent.");
+        } else {
+            Log.i(LOG_TAG, "singleScan: Scan request failed.");
+        }
+    }
 
 
+    @Override
+    public void run() {
+        if (!mWifiManager.isWifiEnabled()) {
+            mWifiManager.setWifiEnabled(true);
+        }
+        singleScan();
+        if (mIsRunning.get()) {
+            mHandler.postDelayed(this, mScanInterval);
+        }
+    }
+
+
+    // definition of 'WifiResultStreamer' class
     class WifiResultStreamer extends FileStreamer {
 
         // properties
@@ -159,15 +196,6 @@ public class WifiSession implements Runnable {
             }
         }
     }
-
-
-
-
-
-
-
-
-
 
 
     // getter and setter

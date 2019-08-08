@@ -42,8 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler = new Handler();
 
-    private Button mStartStopButton;
-    private ProgressDialog mBusyDialog;
+
 
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
 
@@ -53,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     private float rawAccelDataX, rawAccelDataY, rawAccelDataZ, rawGyroDataX, rawGyroDataY, rawGyroDataZ;
     private TextView axLabel, ayLabel, azLabel, wxLabel, wyLabel, wzLabel, rxLabel, ryLabel, rzLabel, mxLabel, myLabel, mzLabel;
+    private TextView mLabelWifiRecordNums, mLabelWifiAPNums, mLabelInfoWifi, mLabelInfoWifiInterval;
+    private TextView mLabelInfoFile, mLabelInfoPrefix, mLabelReferenceTime;
+
+    private Button mStartStopButton;
+    private ProgressDialog mBusyDialog;
 
 
     // Android activity lifecycle states
