@@ -1,7 +1,10 @@
 package com.pjinkim.sensors_data_logger;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -11,6 +14,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+import java.security.KeyException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -55,9 +60,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initializeViews();
 
-        //
+        // initialize screen labels and buttons
+        initializeViews();
+        mBusyDialog = new ProgressDialog(this);
+
+
+        // setup sessions
+        mIMUSession = new IMUSession(this);
+
+
+        // battery power setting
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sensors_data_logger:wakelocktag");
+        mWakeLock.acquire();
 
 
         //
@@ -68,20 +84,90 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerSensors();
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterSensors();
     }
 
 
+    @Override
+    protected void onDestroy() {
+        if (mIsRecording.get()) {
+
+        }
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
+        mIMUSession.unregisterSensors();
+        super.onDestroy();
+    }
+
 
     // methods
+    private void startRecording() {
+
+        // output directory for text files
+        String outputFolder = null;
+        try {
+            OutputDirectoryManager folder = new OutputDirectoryManager();
+            outputFolder = folder.getOutputDirectory();
+        } catch (IOException | KeyException e) {
+
+        }
+
+
+
+        // start each session
+        mIMUSession.startSession(outputFolder);
+
+    }
+
+
+    public void showAlertAndStop(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(text)
+                        .setCancelable(false)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                stopRecording();
+                            }
+                        }).show();
+            }
+        });
+    }
+
+
+    public void showToast(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void resetUI {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStartStopButton.setEnabled(true);
+                mStartStopButton.setText(R.string.start_title);
+            }
+        });
+    }
+
+
     private void initializeViews() {
+
+        mStartStopButton = (Button) findViewById(R.id.buttonStartStop);
+
         axLabel = (TextView) findViewById(R.id.axLabel);
         ayLabel = (TextView) findViewById(R.id.ayLabel);
         azLabel = (TextView) findViewById(R.id.azLabel);
@@ -94,17 +180,6 @@ public class MainActivity extends AppCompatActivity {
         ryLabel = (TextView) findViewById(R.id.ryLabel);
         rzLabel = (TextView) findViewById(R.id.rzLabel);
     }
-
-    public void showToast(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-
 
 
     private void displayCleanValues() {
