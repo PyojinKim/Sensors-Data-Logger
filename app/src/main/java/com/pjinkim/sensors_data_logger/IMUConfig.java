@@ -5,20 +5,16 @@ public class IMUConfig implements java.io.Serializable {
     // properties
     private Boolean mIsFileEnabled = true;
     private String mFolderPrefix = "";
+
     private Boolean mIsWifiEnabled = true;
     private int mWifiScanInterval = 1;
-    private Boolean mIsLocationEnabled = true;
 
-    private int mConnectionMode = 1;
     private int mStartDelay = 0;
     private long mReferenceTimestamp = 0;
-    private String mTimeSyncToken = "";
     private String mOutputFolder = "";
-    public static final int MASTER = 1;
-    public static final int SLAVE = 2;
 
 
-    // methods
+    // getter and setter
     public Boolean getFileEnabled() {
         return this.mIsFileEnabled;
     }
@@ -37,10 +33,6 @@ public class IMUConfig implements java.io.Serializable {
 
     public long getReferenceTimestamp() {
         return this.mReferenceTimestamp;
-    }
-
-    public int getConnectionMode() {
-        return mConnectionMode;
     }
 
     public String getOutputFolder() {
@@ -75,28 +67,8 @@ public class IMUConfig implements java.io.Serializable {
         this.mFolderPrefix = v;
     }
 
-    public Boolean getLocationEnabled() {
-        return mIsLocationEnabled;
-    }
-
-    public void setLocationEnabled(Boolean l) {
-        this.mIsLocationEnabled = l;
-    }
-
-    public void setConnectionMode(int mode) {
-        this.mConnectionMode = mode;
-    }
-
     public void setReferenceTimestamp(long v) {
         this.mReferenceTimestamp = v;
-    }
-
-    public String getTimeSyncToken() {
-        return mTimeSyncToken;
-    }
-
-    public void setTimeSyncToken(String t) {
-        this.mTimeSyncToken = t;
     }
 
     public String getSuffix() {

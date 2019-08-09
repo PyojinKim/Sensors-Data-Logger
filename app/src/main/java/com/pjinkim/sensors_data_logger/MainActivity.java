@@ -5,14 +5,17 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
 import java.security.KeyException;
@@ -20,7 +23,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements WifiSession.WifiScannerCallback {
 
     // properties
     private final static String LOG_TAG = MainActivity.class.getName();
@@ -34,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.WAKE_LOCK
     };
 
     private IMUConfig mConfig = new IMUConfig();
@@ -43,14 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private WifiSession mWifiSession;
 
     private Handler mHandler = new Handler();
-
-
-
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
-
     private PowerManager.WakeLock mWakeLock;
-
-
 
     private TextView mLabelAccelDataX, mLabelAccelDataY, mLabelAccelDataZ;
     private TextView mLabelGyroDataX, mLabelGyroDataY, mLabelGyroDataZ;
@@ -88,6 +84,142 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
+            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_ANDROID);
+        }
+        updateConfig();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        if (mIsRecording.get()) {
+            stopRecording();
+        }
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
+        mIMUSession.unregisterSensors();
+        super.onDestroy();
+    }
+
+
+    // methods
+    public void startStopRecording(View view) {
+        if (!mIsRecording.get()) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+
+    private void startRecording() {
+
+        // output directory for text files
+        String outputFolder = null;
+        try {
+            OutputDirectoryManager folder = new OutputDirectoryManager(mConfig.getFolderPrefix(), mConfig.getSuffix());
+            outputFolder = folder.getOutputDirectory();
+        } catch (IOException e) {
+            showAlertAndStop("Cannot create output folder.");
+            e.printStackTrace();
+        }
+
+        // start each session
+        mIMUSession.startSession(outputFolder);
+        //mWifiSession.startSession(outputFolder);
+        mIsRecording.set(true);
+
+        //
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStartStopButton.setEnabled(true);
+                mStartStopButton.setText("Stop");
+            }
+        });
+        showToast("Record started");
+    }
+
+
+    private static boolean hasPermissions(Context context, String... permissions) {
+
+        // check Android hardware permissions
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void updateConfig() {
+        final int MICRO_TO_SEC = 1000;
+    }
+
+
+    public void showAlertAndStop(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(text)
+                        .setCancelable(false)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                stopRecording();
+                            }
+                        }).show();
+            }
+        });
+    }
+
+
+    public void showToast(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void resetUI {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStartStopButton.setEnabled(true);
+                mStartStopButton.setText(R.string.start_title);
+            }
+        });
+    }
+
+
+    @Override
+    public void processWifiScanResult(final int recordNums, final int currentApNums) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLabelWifiAPNums.setText(String.valueOf(currentApNums));
+                mLabelWifiRecordNums.setText(String.valueOf(recordNums));
+            }
+        });
+    }
+
+
     private void displayIMUSensorMeasurements() {
 
         // get IMU sensor measurements from IMUSession
@@ -120,103 +252,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        if (mIsRecording.get()) {
-
-        }
-        if (mWakeLock.isHeld()) {
-            mWakeLock.release();
-        }
-        mIMUSession.unregisterSensors();
-        super.onDestroy();
-    }
-
-
-    // methods
-    private void startRecording() {
-
-        // output directory for text files
-        String outputFolder = null;
-        try {
-            OutputDirectoryManager folder = new OutputDirectoryManager(mConfig.getFolderPrefix(), mConfig.getSuffix());
-            outputFolder = folder.getOutputDirectory();
-        } catch (IOException e) {
-            showAlertAndStop("Cannot create output folder.");
-            e.printStackTrace();
-        }
-
-        // start each session
-        mIMUSession.startSession(outputFolder);
-        //mWifiSession.startSession(outputFolder);
-        mIsRecording.set(true);
-
-        //
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mStartStopButton.setEnabled(true);
-                mStartStopButton.setText("Stop");
-            }
-        });
-        showToast("Record started");
-    }
-
-
-    public void showAlertAndStop(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(text)
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                stopRecording();
-                            }
-                        }).show();
-            }
-        });
-    }
-
-
-    public void showToast(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void resetUI {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mStartStopButton.setEnabled(true);
-                mStartStopButton.setText(R.string.start_title);
-            }
-        });
-    }
-
-
     private void initializeViews() {
 
         mStartStopButton = (Button) findViewById(R.id.button_start_stop);
@@ -237,20 +272,5 @@ public class MainActivity extends AppCompatActivity {
         mLabelOrientationX = (TextView) findViewById(R.id.label_orientation_X);
         mLabelOrientationY = (TextView) findViewById(R.id.label_orientation_Y);
         mLabelOrientationZ = (TextView) findViewById(R.id.label_orientation_Z);
-    }
-
-
-    private void displayCleanValues() {
-        mLabelAccelDataX.setText("0.0");
-        mLabelAccelDataY.setText("0.0");
-        mLabelAccelDataZ.setText("0.0");
-
-        mLabelGyroDataX.setText("0.0");
-        mLabelGyroDataY.setText("0.0");
-        mLabelGyroDataZ.setText("0.0");
-
-        mLabelOrientationX.setText("0.0");
-        mLabelOrientationY.setText("0.0");
-        mLabelOrientationZ.setText("0.0");
     }
 }

@@ -529,12 +529,13 @@
 
     <Button
         android:id="@+id/button_start_stop"
-        android:layout_width="268dp"
+        android:layout_width="300dp"
         android:layout_height="50dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/roboto_black"
+        android:onClick="startStopRecording"
         android:text="@string/start_title"
         android:textAlignment="center"
         android:textColor="#3D5AFE"
