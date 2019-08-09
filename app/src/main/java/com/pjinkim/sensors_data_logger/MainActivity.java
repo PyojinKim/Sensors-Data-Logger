@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -197,12 +198,14 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     }
 
 
-    private void resetUI {
+    private void resetUI() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mStartStopButton.setEnabled(true);
                 mStartStopButton.setText(R.string.start_title);
+                mLabelWifiAPNums.setText("N/A");
+                mLabelWifiRecordNums.setText("N/A");
             }
         });
     }
@@ -241,8 +244,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             }
         });
 
-        // determine display update rate (500 ms)
-        final long displayInterval = 500;
+        // determine display update rate (100 ms)
+        final long displayInterval = 100;
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
