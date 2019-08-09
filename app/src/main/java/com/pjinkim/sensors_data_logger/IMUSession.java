@@ -36,9 +36,9 @@ public class IMUSession implements SensorEventListener {
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
 
-    private float[] mGyroBias = new float[3];
-    private float[] mMagnetBias = new float[3];
-    private float[] mAcceBias = new float[3];
+    private float[] mAcceMeasure = new float[3];
+    private float[] mGyroMeasure = new float[3];
+    private float[] mMagnetMeasure = new float[3];
 
 
     // constructor
@@ -51,6 +51,10 @@ public class IMUSession implements SensorEventListener {
         // setup and register various sensors
         mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         mSensors.put("gyro", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
+        mSensors.put("gyro_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED));
+        mSensors.put("magnet", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
+        mSensors.put("magnet_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED));
+        mSensors.put("step", mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
         registerSensors();
     }
 
@@ -76,6 +80,10 @@ public class IMUSession implements SensorEventListener {
             try {
                 mFileStreamer.addFile("acce", "acce.txt");
                 mFileStreamer.addFile("gyro", "gyro.txt");
+                mFileStreamer.addFile("gyro_uncalib", "gyro_uncalib.txt");
+                mFileStreamer.addFile("magnet", "magnet.txt");
+                mFileStreamer.addFile("magnet_uncalib", "magnet_uncalib.txt");
+                mFileStreamer.addFile("step", "step.txt");
                 mIsWritingFile.set(true);
             } catch (IOException e) {
                 mContext.showToast("Error occurs when creating output IMU files.");
@@ -92,8 +100,8 @@ public class IMUSession implements SensorEventListener {
 
             // close text files and save gyro bias data
             try {
-                BufferedWriter gyroBiasEndWriter = mFileStreamer.getFileWriter("gyro_bias");
-                gyroBiasEndWriter.write(String.format(Locale.US, "%f %f %f", mGyroBias[0], mGyroBias[1], mGyroBias[2]));
+                //BufferedWriter gyroBiasEndWriter = mFileStreamer.getFileWriter("gyro_bias");
+                //gyroBiasEndWriter.write(String.format(Locale.US, "%f %f %f", mGyroBias[0], mGyroBias[1], mGyroBias[2]));
                 mFileStreamer.endFiles();
             } catch (IOException e) {
                 mContext.showToast("Error occurs when finishing IMU text files.");
@@ -142,14 +150,51 @@ public class IMUSession implements SensorEventListener {
         try {
             switch (eachSensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
+                    mAcceMeasure[0] = sensorEvent.values[0];
+                    mAcceMeasure[1] = sensorEvent.values[1];
+                    mAcceMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
                     }
                     break;
 
                 case Sensor.TYPE_GYROSCOPE:
+                    mGyroMeasure[0] = sensorEvent.values[0];
+                    mGyroMeasure[1] = sensorEvent.values[1];
+                    mGyroMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gyro", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "gyro_uncalib", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_MAGNETIC_FIELD:
+                    mMagnetMeasure[0] = sensorEvent.values[0];
+                    mMagnetMeasure[1] = sensorEvent.values[1];
+                    mMagnetMeasure[2] = sensorEvent.values[2];
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "magnet", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "magnet_uncalib", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_STEP_COUNTER:
+                    if (mInitialStepCount < 0) {
+                        mInitialStepCount = sensorEvent.values[0] - 1;
+                    }
+                    values[0] = sensorEvent.values[0] - mInitialStepCount;
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "step", 1, values);
                     }
                     break;
             }
@@ -170,38 +215,15 @@ public class IMUSession implements SensorEventListener {
         return mIsRecording.get();
     }
 
-    public float[] getGyroBias() {
-        return mGyroBias;
+    public float[] getAcceMeasure() {
+        return mAcceMeasure;
     }
 
-    public float[] getMagnetBias() {
-        return mMagnetBias;
+    public float[] getGyroMeasure() {
+        return mGyroMeasure;
     }
 
-    public float[] getAcceBias() {
-        return mAcceBias;
+    public float[] getMagnetMeasure() {
+        return mMagnetMeasure;
     }
 }
-
-
-
-
-            /*if (eachSensor.getType() == ) {
-                rawAccelDataX = sensorEvent.values[0];
-                rawAccelDataY = sensorEvent.values[1];
-                rawAccelDataZ = sensorEvent.values[2];
-
-                axLabel.setText(String.format("%.3f", rawAccelDataX));
-                ayLabel.setText(String.format("%.3f", rawAccelDataY));
-                azLabel.setText(String.format("%.3f", rawAccelDataZ));
-            } else if (eachSensor.getType() == ) {
-                rawGyroDataX = sensorEvent.values[0];
-                rawGyroDataY = sensorEvent.values[1];
-                rawGyroDataZ = sensorEvent.values[2];
-
-                wxLabel.setText(String.format("%.3f", rawGyroDataX));
-                wyLabel.setText(String.format("%.3f", rawGyroDataY));
-                wzLabel.setText(String.format("%.3f", rawGyroDataZ));
-            } else {
-
-            } */

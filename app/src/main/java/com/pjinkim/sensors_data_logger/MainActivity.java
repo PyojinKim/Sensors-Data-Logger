@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.security.KeyException;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private IMUConfig mConfig = new IMUConfig();
     private IMUSession mIMUSession;
+    private WifiSession mWifiSession;
 
     private Handler mHandler = new Handler();
 
@@ -50,8 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private float rawAccelDataX, rawAccelDataY, rawAccelDataZ, rawGyroDataX, rawGyroDataY, rawGyroDataZ;
-    private TextView axLabel, ayLabel, azLabel, wxLabel, wyLabel, wzLabel, rxLabel, ryLabel, rzLabel, mxLabel, myLabel, mzLabel;
+    private TextView mLabelAccelDataX, mLabelAccelDataY, mLabelAccelDataZ;
+    private TextView mLabelGyroDataX, mLabelGyroDataY, mLabelGyroDataZ;
+    private TextView mLabelOrientationX, mLabelOrientationY, mLabelOrientationZ;
     private TextView mLabelWifiRecordNums, mLabelWifiAPNums, mLabelInfoWifi, mLabelInfoWifiInterval;
     private TextView mLabelInfoFile, mLabelInfoPrefix, mLabelReferenceTime;
 
@@ -80,9 +83,45 @@ public class MainActivity extends AppCompatActivity {
         mWakeLock.acquire();
 
 
-        //
-
+        // monitor various sensor measurements
+        displayIMUSensorMeasurements();
     }
+
+
+    private void displayIMUSensorMeasurements() {
+
+        // get IMU sensor measurements from IMUSession
+        final float[] accel_data = mIMUSession.getAcceMeasure();
+        final float[] gyro_data = mIMUSession.getGyroMeasure();
+        final float[] magnet_data = mIMUSession.getMagnetMeasure();
+
+        // update current screen (activity)
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLabelAccelDataX.setText(String.format(Locale.US, "%.3f", accel_data[0]));
+                mLabelAccelDataY.setText(String.format(Locale.US, "%.3f", accel_data[1]));
+                mLabelAccelDataZ.setText(String.format(Locale.US, "%.3f", accel_data[2]));
+
+                mLabelGyroDataX.setText(String.format(Locale.US, "%.3f", gyro_data[0]));
+                mLabelGyroDataY.setText(String.format(Locale.US, "%.3f", gyro_data[1]));
+                mLabelGyroDataZ.setText(String.format(Locale.US, "%.3f", gyro_data[2]));
+            }
+        });
+
+        // determine display update rate (500 ms)
+        final long displayInterval = 500;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                displayIMUSensorMeasurements();
+            }
+        }, displayInterval);
+    }
+
+
+
+
 
 
     @Override
@@ -116,17 +155,27 @@ public class MainActivity extends AppCompatActivity {
         // output directory for text files
         String outputFolder = null;
         try {
-            OutputDirectoryManager folder = new OutputDirectoryManager();
+            OutputDirectoryManager folder = new OutputDirectoryManager(mConfig.getFolderPrefix(), mConfig.getSuffix());
             outputFolder = folder.getOutputDirectory();
-        } catch (IOException | KeyException e) {
-
+        } catch (IOException e) {
+            showAlertAndStop("Cannot create output folder.");
+            e.printStackTrace();
         }
-
-
 
         // start each session
         mIMUSession.startSession(outputFolder);
+        //mWifiSession.startSession(outputFolder);
+        mIsRecording.set(true);
 
+        //
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStartStopButton.setEnabled(true);
+                mStartStopButton.setText("Stop");
+            }
+        });
+        showToast("Record started");
     }
 
 
@@ -170,33 +219,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeViews() {
 
-        mStartStopButton = (Button) findViewById(R.id.buttonStartStop);
+        mStartStopButton = (Button) findViewById(R.id.button_start_stop);
 
-        axLabel = (TextView) findViewById(R.id.axLabel);
-        ayLabel = (TextView) findViewById(R.id.ayLabel);
-        azLabel = (TextView) findViewById(R.id.azLabel);
+        mLabelWifiRecordNums = (TextView) findViewById(R.id.label_wifi_record_num);
+        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_beacon_num);
+        mLabelInfoWifi = (TextView) findViewById(R.id.label_info_wifi);
+        mLabelInfoWifiInterval = (TextView) findViewById(R.id.label_info_wifi_interval);
 
-        wxLabel = (TextView) findViewById(R.id.wxLabel);
-        wyLabel = (TextView) findViewById(R.id.wyLabel);
-        wzLabel = (TextView) findViewById(R.id.wzLabel);
+        mLabelAccelDataX = (TextView) findViewById(R.id.label_accel_X);
+        mLabelAccelDataY = (TextView) findViewById(R.id.label_accel_Y);
+        mLabelAccelDataZ = (TextView) findViewById(R.id.label_accel_Z);
 
-        rxLabel = (TextView) findViewById(R.id.rxLabel);
-        ryLabel = (TextView) findViewById(R.id.ryLabel);
-        rzLabel = (TextView) findViewById(R.id.rzLabel);
+        mLabelGyroDataX = (TextView) findViewById(R.id.label_gyro_X);
+        mLabelGyroDataY = (TextView) findViewById(R.id.label_gyro_Y);
+        mLabelGyroDataZ = (TextView) findViewById(R.id.label_gyro_Z);
+
+        mLabelOrientationX = (TextView) findViewById(R.id.label_orientation_X);
+        mLabelOrientationY = (TextView) findViewById(R.id.label_orientation_Y);
+        mLabelOrientationZ = (TextView) findViewById(R.id.label_orientation_Z);
     }
 
 
     private void displayCleanValues() {
-        axLabel.setText("0.0");
-        ayLabel.setText("0.0");
-        azLabel.setText("0.0");
+        mLabelAccelDataX.setText("0.0");
+        mLabelAccelDataY.setText("0.0");
+        mLabelAccelDataZ.setText("0.0");
 
-        wxLabel.setText("0.0");
-        wyLabel.setText("0.0");
-        wzLabel.setText("0.0");
+        mLabelGyroDataX.setText("0.0");
+        mLabelGyroDataY.setText("0.0");
+        mLabelGyroDataZ.setText("0.0");
 
-        rxLabel.setText("0.0");
-        ryLabel.setText("0.0");
-        rzLabel.setText("0.0");
+        mLabelOrientationX.setText("0.0");
+        mLabelOrientationY.setText("0.0");
+        mLabelOrientationZ.setText("0.0");
     }
 }
