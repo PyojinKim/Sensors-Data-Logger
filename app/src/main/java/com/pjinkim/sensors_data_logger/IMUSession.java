@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -40,6 +41,10 @@ public class IMUSession implements SensorEventListener {
     private float[] mGyroMeasure = new float[3];
     private float[] mMagnetMeasure = new float[3];
 
+    private float[] mAcceBias = new float[3];
+    private float[] mGyroBias = new float[3];
+    private float[] mMagnetBias = new float[3];
+
 
     // constructor
     public IMUSession(MainActivity context) {
@@ -49,12 +54,24 @@ public class IMUSession implements SensorEventListener {
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
 
         // setup and register various sensors
-        mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        if (Build.VERSION.SDK_INT < 26) {
+            Log.i(LOG_TAG, "IMUSession: " + String.format(Locale.US, "API level: %d, TYPE_ACCELEROMETER is used.", Build.VERSION.SDK_INT));
+            mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        } else {
+            Log.i(LOG_TAG, "IMUSession: " + String.format(Locale.US, "API level: %d, TYPE_ACCELEROMETER_UNCALIBRATED is used.", Build.VERSION.SDK_INT));
+            mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED));
+        }
         mSensors.put("gyro", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
         mSensors.put("gyro_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED));
+        mSensors.put("linacce", mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION));
+        mSensors.put("gravity", mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY));
         mSensors.put("magnet", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
         mSensors.put("magnet_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED));
+        mSensors.put("rv", mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR));
+        mSensors.put("game_rv", mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR));
+        mSensors.put("magnetic_rv", mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR));
         mSensors.put("step", mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
+        mSensors.put("pressure", mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE));
         registerSensors();
     }
 
@@ -81,9 +98,16 @@ public class IMUSession implements SensorEventListener {
                 mFileStreamer.addFile("acce", "acce.txt");
                 mFileStreamer.addFile("gyro", "gyro.txt");
                 mFileStreamer.addFile("gyro_uncalib", "gyro_uncalib.txt");
+                mFileStreamer.addFile("linacce", "linacce.txt");
+                mFileStreamer.addFile("gravity", "gravity.txt");
                 mFileStreamer.addFile("magnet", "magnet.txt");
                 mFileStreamer.addFile("magnet_uncalib", "magnet_uncalib.txt");
+                mFileStreamer.addFile("rv", "rv.txt");
+                mFileStreamer.addFile("game_rv", "game_rv.txt");
+                mFileStreamer.addFile("magnetic_rv", "magnetic_rv.txt");
                 mFileStreamer.addFile("step", "step.txt");
+                mFileStreamer.addFile("pressure", "pressure.txt");
+                mFileStreamer.addFile("gyro_bias", "gyro_bias.txt");
                 mIsWritingFile.set(true);
             } catch (IOException e) {
                 mContext.showToast("Error occurs when creating output IMU files.");
@@ -100,8 +124,8 @@ public class IMUSession implements SensorEventListener {
 
             // close text files and save gyro bias data
             try {
-                //BufferedWriter gyroBiasEndWriter = mFileStreamer.getFileWriter("gyro_bias");
-                //gyroBiasEndWriter.write(String.format(Locale.US, "%f %f %f", mGyroBias[0], mGyroBias[1], mGyroBias[2]));
+                BufferedWriter gyroBiasEndWriter = mFileStreamer.getFileWriter("gyro_bias");
+                gyroBiasEndWriter.write(String.format(Locale.US, "%f %f %f", mGyroBias[0], mGyroBias[1], mGyroBias[2]));
                 mFileStreamer.endFiles();
             } catch (IOException e) {
                 mContext.showToast("Error occurs when finishing IMU text files.");
@@ -158,6 +182,18 @@ public class IMUSession implements SensorEventListener {
                     }
                     break;
 
+                case Sensor.TYPE_ACCELEROMETER_UNCALIBRATED:
+                    mAcceMeasure[0] = sensorEvent.values[0];
+                    mAcceMeasure[1] = sensorEvent.values[1];
+                    mAcceMeasure[2] = sensorEvent.values[2];
+                    mAcceBias[0] = sensorEvent.values[3];
+                    mAcceBias[1] = sensorEvent.values[4];
+                    mAcceBias[2] = sensorEvent.values[5];
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
+                    }
+                    break;
+
                 case Sensor.TYPE_GYROSCOPE:
                     mGyroMeasure[0] = sensorEvent.values[0];
                     mGyroMeasure[1] = sensorEvent.values[1];
@@ -168,8 +204,23 @@ public class IMUSession implements SensorEventListener {
                     break;
 
                 case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
+                    mGyroBias[0] = sensorEvent.values[3];
+                    mGyroBias[1] = sensorEvent.values[4];
+                    mGyroBias[2] = sensorEvent.values[5];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gyro_uncalib", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_LINEAR_ACCELERATION:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "linacce", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_GRAVITY:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "gravity", 3, sensorEvent.values);
                     }
                     break;
 
@@ -183,8 +234,29 @@ public class IMUSession implements SensorEventListener {
                     break;
 
                 case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                    mMagnetBias[0] = sensorEvent.values[3];
+                    mMagnetBias[1] = sensorEvent.values[4];
+                    mMagnetBias[2] = sensorEvent.values[5];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet_uncalib", 3, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_ROTATION_VECTOR:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "rv", 4, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_GAME_ROTATION_VECTOR:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "game_rv", 4, sensorEvent.values);
+                    }
+                    break;
+
+                case Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "magnetic_rv", 4, sensorEvent.values);
                     }
                     break;
 
@@ -195,6 +267,12 @@ public class IMUSession implements SensorEventListener {
                     values[0] = sensorEvent.values[0] - mInitialStepCount;
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "step", 1, values);
+                    }
+                    break;
+
+                case Sensor.TYPE_PRESSURE:
+                    if (isFileSaved) {
+                        mFileStreamer.addRecord(timestamp, "pressure", 1, sensorEvent.values);
                     }
                     break;
             }

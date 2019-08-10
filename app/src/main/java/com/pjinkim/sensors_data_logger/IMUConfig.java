@@ -72,6 +72,6 @@ public class IMUConfig implements java.io.Serializable {
     }
 
     public String getSuffix() {
-        return "R";
+        return "R_pjinkim";
     }
 }

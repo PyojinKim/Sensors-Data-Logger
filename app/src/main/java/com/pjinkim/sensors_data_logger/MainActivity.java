@@ -15,11 +15,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
-import java.security.KeyException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,9 +30,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private final static String LOG_TAG = MainActivity.class.getName();
 
     private final static int REQUEST_CODE_ANDROID = 1001;
-    private final static int REQUEST_CODE_TIME_SYNC = 1003;
-    private final static int SEC_TO_MILL = 1000;
-
     private static String[] REQUIRED_PERMISSIONS = new String[] {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -56,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private TextView mLabelInfoFile, mLabelInfoPrefix, mLabelReferenceTime;
 
     private Button mStartStopButton;
-    private ProgressDialog mBusyDialog;
 
 
     // Android activity lifecycle states
@@ -67,11 +63,11 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         // initialize screen labels and buttons
         initializeViews();
-        mBusyDialog = new ProgressDialog(this);
 
 
         // setup sessions
         mIMUSession = new IMUSession(this);
+        //mWifiSession = new WifiSession(this);
 
 
         // battery power setting
@@ -131,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         try {
             OutputDirectoryManager folder = new OutputDirectoryManager(mConfig.getFolderPrefix(), mConfig.getSuffix());
             outputFolder = folder.getOutputDirectory();
+            mConfig.setOutputFolder(outputFolder);
         } catch (IOException e) {
             showAlertAndStop("Cannot create output folder.");
             e.printStackTrace();
@@ -141,15 +138,33 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         //mWifiSession.startSession(outputFolder);
         mIsRecording.set(true);
 
-        //
+        // update Start/Stop button UI
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mStartStopButton.setEnabled(true);
-                mStartStopButton.setText("Stop");
+                mStartStopButton.setText(R.string.stop_title);
             }
         });
-        showToast("Record started");
+        showToast("Recording starts!");
+    }
+
+
+    protected void stopRecording() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                // stop each session
+                mIMUSession.stopSession();
+                //mWifiSession.stopSession();
+                mIsRecording.set(false);
+
+                // update screen UI and button
+                showToast("Recording stops!");
+                resetUI();
+            }
+        });
     }
 
 
@@ -212,6 +227,16 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
 
     @Override
+    public void onBackPressed() {
+
+        // nullify back button when recording starts
+        if (!mIsRecording.get()) {
+            super.onBackPressed();
+        }
+    }
+
+
+    @Override
     public void processWifiScanResult(final int recordNums, final int currentApNums) {
         runOnUiThread(new Runnable() {
             @Override
@@ -220,6 +245,22 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mLabelWifiRecordNums.setText(String.valueOf(recordNums));
             }
         });
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode != REQUEST_CODE_ANDROID) {
+            return;
+        }
+
+        for (int grantResult : grantResults) {
+            if (grantResult == PackageManager.PERMISSION_DENIED) {
+                showToast("Permission not granted");
+                finish();
+                return;
+            }
+        }
     }
 
 
