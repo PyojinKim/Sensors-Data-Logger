@@ -35,7 +35,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
-            Manifest.permission.WAKE_LOCK
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     private IMUConfig mConfig = new IMUConfig();
