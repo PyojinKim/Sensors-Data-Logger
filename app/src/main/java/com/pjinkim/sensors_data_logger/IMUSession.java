@@ -304,4 +304,16 @@ public class IMUSession implements SensorEventListener {
     public float[] getMagnetMeasure() {
         return mMagnetMeasure;
     }
+
+    public float[] getAcceBias() {
+        return mAcceBias;
+    }
+
+    public float[] getGyroBias() {
+        return mGyroBias;
+    }
+
+    public float[] getMagnetBias() {
+        return mMagnetBias;
+    }
 }

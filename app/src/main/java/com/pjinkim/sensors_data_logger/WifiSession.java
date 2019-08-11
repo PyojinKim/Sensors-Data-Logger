@@ -176,6 +176,8 @@ public class WifiSession implements Runnable {
                 for (ScanResult eachResult : results) {
                     stringBuilder.append(eachResult.timestamp);
                     stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.venueName);
+                    stringBuilder.append('\t');
                     stringBuilder.append(eachResult.BSSID);
                     stringBuilder.append('\t');
                     stringBuilder.append(String.valueOf(eachResult.level));

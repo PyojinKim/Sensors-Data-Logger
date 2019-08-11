@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         // setup sessions
         mIMUSession = new IMUSession(this);
-        //mWifiSession = new WifiSession(this);
+        mWifiSession = new WifiSession(this);
 
 
         // battery power setting
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         // start each session
         mIMUSession.startSession(outputFolder);
-        //mWifiSession.startSession(outputFolder);
+        mWifiSession.startSession(outputFolder);
         mIsRecording.set(true);
 
         // update Start/Stop button UI
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
                 // stop each session
                 mIMUSession.stopSession();
-                //mWifiSession.stopSession();
+                mWifiSession.stopSession();
                 mIsRecording.set(false);
 
                 // update screen UI and button
