@@ -265,6 +265,29 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     }
 
 
+    private void initializeViews() {
+
+        mStartStopButton = (Button) findViewById(R.id.button_start_stop);
+
+        mLabelWifiRecordNums = (TextView) findViewById(R.id.label_wifi_record_num);
+        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_beacon_num);
+        mLabelInfoWifi = (TextView) findViewById(R.id.label_info_wifi);
+        mLabelInfoWifiInterval = (TextView) findViewById(R.id.label_info_wifi_interval);
+
+        mLabelAccelDataX = (TextView) findViewById(R.id.label_accel_X);
+        mLabelAccelDataY = (TextView) findViewById(R.id.label_accel_Y);
+        mLabelAccelDataZ = (TextView) findViewById(R.id.label_accel_Z);
+
+        mLabelGyroDataX = (TextView) findViewById(R.id.label_gyro_X);
+        mLabelGyroDataY = (TextView) findViewById(R.id.label_gyro_Y);
+        mLabelGyroDataZ = (TextView) findViewById(R.id.label_gyro_Z);
+
+        mLabelOrientationX = (TextView) findViewById(R.id.label_orientation_X);
+        mLabelOrientationY = (TextView) findViewById(R.id.label_orientation_Y);
+        mLabelOrientationZ = (TextView) findViewById(R.id.label_orientation_Z);
+    }
+
+
     private void displayIMUSensorMeasurements() {
 
         // get IMU sensor measurements from IMUSession
@@ -297,25 +320,9 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     }
 
 
-    private void initializeViews() {
+    private void displayWifiSensorMeasurements() {
 
-        mStartStopButton = (Button) findViewById(R.id.button_start_stop);
+        // get Wifi sensor measurements from WifiSession
 
-        mLabelWifiRecordNums = (TextView) findViewById(R.id.label_wifi_record_num);
-        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_beacon_num);
-        mLabelInfoWifi = (TextView) findViewById(R.id.label_info_wifi);
-        mLabelInfoWifiInterval = (TextView) findViewById(R.id.label_info_wifi_interval);
-
-        mLabelAccelDataX = (TextView) findViewById(R.id.label_accel_X);
-        mLabelAccelDataY = (TextView) findViewById(R.id.label_accel_Y);
-        mLabelAccelDataZ = (TextView) findViewById(R.id.label_accel_Z);
-
-        mLabelGyroDataX = (TextView) findViewById(R.id.label_gyro_X);
-        mLabelGyroDataY = (TextView) findViewById(R.id.label_gyro_Y);
-        mLabelGyroDataZ = (TextView) findViewById(R.id.label_gyro_Z);
-
-        mLabelOrientationX = (TextView) findViewById(R.id.label_orientation_X);
-        mLabelOrientationY = (TextView) findViewById(R.id.label_orientation_Y);
-        mLabelOrientationZ = (TextView) findViewById(R.id.label_orientation_Z);
     }
 }

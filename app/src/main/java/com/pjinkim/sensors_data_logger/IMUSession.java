@@ -45,6 +45,11 @@ public class IMUSession implements SensorEventListener {
     private float[] mGyroBias = new float[3];
     private float[] mMagnetBias = new float[3];
 
+    private float[] mAccelerometerReading = new float[3];
+    private float[] mMagnetometerReading = new float[3];
+    private float[] mRotationMatrix = new float[9];
+    private float[] mOrientationAngles = new float[3];
+
 
     // constructor
     public IMUSession(MainActivity context) {
@@ -54,13 +59,8 @@ public class IMUSession implements SensorEventListener {
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
 
         // setup and register various sensors
-        if (Build.VERSION.SDK_INT < 26) {
-            Log.i(LOG_TAG, "IMUSession: " + String.format(Locale.US, "API level: %d, TYPE_ACCELEROMETER is used.", Build.VERSION.SDK_INT));
-            mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
-        } else {
-            Log.i(LOG_TAG, "IMUSession: " + String.format(Locale.US, "API level: %d, TYPE_ACCELEROMETER_UNCALIBRATED is used.", Build.VERSION.SDK_INT));
-            mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED));
-        }
+        mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        mSensors.put("acce_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED));
         mSensors.put("gyro", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
         mSensors.put("gyro_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED));
         mSensors.put("linacce", mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION));
@@ -96,6 +96,7 @@ public class IMUSession implements SensorEventListener {
             mFileStreamer = new FileStreamer(mContext, streamFolder);
             try {
                 mFileStreamer.addFile("acce", "acce.txt");
+                mFileStreamer.addFile("acce_uncalib", "acce_uncalib.txt");
                 mFileStreamer.addFile("gyro", "gyro.txt");
                 mFileStreamer.addFile("gyro_uncalib", "gyro_uncalib.txt");
                 mFileStreamer.addFile("linacce", "linacce.txt");
@@ -107,7 +108,9 @@ public class IMUSession implements SensorEventListener {
                 mFileStreamer.addFile("magnetic_rv", "magnetic_rv.txt");
                 mFileStreamer.addFile("step", "step.txt");
                 mFileStreamer.addFile("pressure", "pressure.txt");
+                mFileStreamer.addFile("acce_bias", "acce_bias.txt");
                 mFileStreamer.addFile("gyro_bias", "gyro_bias.txt");
+                mFileStreamer.addFile("magnet_bias", "magnet_bias.txt");
                 mIsWritingFile.set(true);
             } catch (IOException e) {
                 mContext.showToast("Error occurs when creating output IMU files.");
@@ -122,10 +125,8 @@ public class IMUSession implements SensorEventListener {
         mIsRecording.set(false);
         if (mIsWritingFile.get()) {
 
-            // close text files and save gyro bias data
+            // close all recorded text files
             try {
-                BufferedWriter gyroBiasEndWriter = mFileStreamer.getFileWriter("gyro_bias");
-                gyroBiasEndWriter.write(String.format(Locale.US, "%f %f %f", mGyroBias[0], mGyroBias[1], mGyroBias[2]));
                 mFileStreamer.endFiles();
             } catch (IOException e) {
                 mContext.showToast("Error occurs when finishing IMU text files.");
@@ -177,20 +178,19 @@ public class IMUSession implements SensorEventListener {
                     mAcceMeasure[0] = sensorEvent.values[0];
                     mAcceMeasure[1] = sensorEvent.values[1];
                     mAcceMeasure[2] = sensorEvent.values[2];
+                    System.arraycopy(sensorEvent.values, 0, mAccelerometerReading, 0, mAccelerometerReading.length);
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
                     }
                     break;
 
                 case Sensor.TYPE_ACCELEROMETER_UNCALIBRATED:
-                    mAcceMeasure[0] = sensorEvent.values[0];
-                    mAcceMeasure[1] = sensorEvent.values[1];
-                    mAcceMeasure[2] = sensorEvent.values[2];
                     mAcceBias[0] = sensorEvent.values[3];
                     mAcceBias[1] = sensorEvent.values[4];
                     mAcceBias[2] = sensorEvent.values[5];
                     if (isFileSaved) {
-                        mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
+                        mFileStreamer.addRecord(timestamp, "acce_uncalib", 3, sensorEvent.values);
+                        mFileStreamer.addRecord(timestamp, "acce_bias", 3, mAcceBias);
                     }
                     break;
 
@@ -209,6 +209,7 @@ public class IMUSession implements SensorEventListener {
                     mGyroBias[2] = sensorEvent.values[5];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gyro_uncalib", 3, sensorEvent.values);
+                        mFileStreamer.addRecord(timestamp, "gyro_bias", 3, mGyroBias);
                     }
                     break;
 
@@ -228,6 +229,7 @@ public class IMUSession implements SensorEventListener {
                     mMagnetMeasure[0] = sensorEvent.values[0];
                     mMagnetMeasure[1] = sensorEvent.values[1];
                     mMagnetMeasure[2] = sensorEvent.values[2];
+                    System.arraycopy(sensorEvent.values, 0, mMagnetometerReading, 0, mMagnetometerReading.length);
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet", 3, sensorEvent.values);
                     }
@@ -239,6 +241,7 @@ public class IMUSession implements SensorEventListener {
                     mMagnetBias[2] = sensorEvent.values[5];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet_uncalib", 3, sensorEvent.values);
+                        mFileStreamer.addRecord(timestamp, "magnet_bias", 3, mMagnetBias);
                     }
                     break;
 
