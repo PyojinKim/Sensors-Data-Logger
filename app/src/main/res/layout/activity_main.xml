@@ -7,96 +7,6 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/rzLabelTemplate5"
-        android:layout_width="55dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="-9.875"
-        android:textAlignment="textStart"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        tools:layout_editor_absoluteX="178dp"
-        tools:layout_editor_absoluteY="378dp" />
-
-    <TextView
-        android:id="@+id/textViewTemplate4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="Rz:"
-        android:textAlignment="textEnd"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        tools:layout_editor_absoluteX="134dp"
-        tools:layout_editor_absoluteY="378dp" />
-
-    <TextView
-        android:id="@+id/rzLabelTemplate4"
-        android:layout_width="55dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="-9.875"
-        android:textAlignment="textStart"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        tools:layout_editor_absoluteX="178dp"
-        tools:layout_editor_absoluteY="378dp" />
-
-    <TextView
-        android:id="@+id/textViewTemplate3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="Rz:"
-        android:textAlignment="textEnd"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        tools:layout_editor_absoluteX="134dp"
-        tools:layout_editor_absoluteY="378dp" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalGuideline1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.25" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalGuideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalGuideline3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.75" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/horizontalGuideline1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/horizontalGuideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/horizontalGuideline3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75" />
-
-    <TextView
         android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -208,11 +118,90 @@
         app:layout_constraintStart_toEndOf="@+id/textView7" />
 
     <TextView
+        android:id="@+id/textView12"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias X:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Y:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_accel_bias_X"
+        app:layout_constraintStart_toEndOf="@+id/label_accel_bias_X" />
+
+    <TextView
+        android:id="@+id/textView19"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Z:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_accel_bias_Y"
+        app:layout_constraintStart_toEndOf="@+id/label_accel_bias_Y" />
+
+    <TextView
+        android:id="@+id/label_accel_bias_X"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView12"
+        app:layout_constraintStart_toEndOf="@+id/textView12" />
+
+    <TextView
+        android:id="@+id/label_accel_bias_Y"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView17"
+        app:layout_constraintStart_toEndOf="@+id/textView17" />
+
+    <TextView
+        android:id="@+id/label_accel_bias_Z"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView19"
+        app:layout_constraintStart_toEndOf="@+id/textView19" />
+
+    <TextView
         android:id="@+id/gyroscopeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="80dp"
         android:fontFamily="@font/roboto"
         android:text="Gyroscope Data (rad/s)"
         android:textAlignment="textStart"
@@ -301,13 +290,92 @@
         app:layout_constraintStart_toEndOf="@+id/textView9" />
 
     <TextView
-        android:id="@+id/deviceOrientationTitle"
+        android:id="@+id/textView22"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias X:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Y:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_gyro_bias_X"
+        app:layout_constraintStart_toEndOf="@+id/label_gyro_bias_X" />
+
+    <TextView
+        android:id="@+id/textView25"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Z:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_gyro_bias_Y"
+        app:layout_constraintStart_toEndOf="@+id/label_gyro_bias_Y" />
+
+    <TextView
+        android:id="@+id/label_gyro_bias_X"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView22"
+        app:layout_constraintStart_toEndOf="@+id/textView22" />
+
+    <TextView
+        android:id="@+id/label_gyro_bias_Y"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView24"
+        app:layout_constraintStart_toEndOf="@+id/textView24" />
+
+    <TextView
+        android:id="@+id/label_gyro_bias_Z"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-9.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView25"
+        app:layout_constraintStart_toEndOf="@+id/textView25" />
+
+    <TextView
+        android:id="@+id/MagneticFieldTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="80dp"
         android:fontFamily="@font/roboto"
-        android:text="Device Orientation (rad)"
+        android:text="Magnetic Field Data (microtesla)"
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="18sp"
@@ -315,47 +383,47 @@
         app:layout_constraintTop_toBottomOf="@+id/gyroscopeTitle" />
 
     <TextView
-        android:id="@+id/textView13"
+        android:id="@+id/textView27"
         android:layout_width="28dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
-        android:text="Rx:"
+        android:text="Mx:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/deviceOrientationTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/MagneticFieldTitle" />
 
     <TextView
-        android:id="@+id/textView14"
+        android:id="@+id/textView28"
         android:layout_width="28dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:fontFamily="@font/roboto"
-        android:text="Ry:"
+        android:text="My:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/label_orientation_X"
-        app:layout_constraintStart_toEndOf="@+id/label_orientation_X" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_magnet_X"
+        app:layout_constraintStart_toEndOf="@+id/label_magnet_X" />
 
     <TextView
-        android:id="@+id/textView15"
+        android:id="@+id/textView29"
         android:layout_width="28dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:fontFamily="@font/roboto"
-        android:text="Rz:"
+        android:text="Mz:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/label_orientation_Y"
-        app:layout_constraintStart_toEndOf="@+id/label_orientation_Y" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_magnet_Y"
+        app:layout_constraintStart_toEndOf="@+id/label_magnet_Y" />
 
     <TextView
-        android:id="@+id/label_orientation_X"
+        android:id="@+id/label_magnet_X"
         android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -364,11 +432,11 @@
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView13"
-        app:layout_constraintStart_toEndOf="@+id/textView13" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView27"
+        app:layout_constraintStart_toEndOf="@+id/textView27" />
 
     <TextView
-        android:id="@+id/label_orientation_Y"
+        android:id="@+id/label_magnet_Y"
         android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -377,11 +445,11 @@
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView14"
-        app:layout_constraintStart_toEndOf="@+id/textView14" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView28"
+        app:layout_constraintStart_toEndOf="@+id/textView28" />
 
     <TextView
-        android:id="@+id/label_orientation_Z"
+        android:id="@+id/label_magnet_Z"
         android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -390,31 +458,110 @@
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView15"
-        app:layout_constraintStart_toEndOf="@+id/textView15" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView29"
+        app:layout_constraintStart_toEndOf="@+id/textView29" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias X:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Y:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_magnet_bias_X"
+        app:layout_constraintStart_toEndOf="@+id/label_magnet_bias_X" />
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Bias Z:"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/label_magnet_bias_X"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-119.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView3"
+        app:layout_constraintStart_toEndOf="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/label_magnet_bias_Y"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-119.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView11"
+        app:layout_constraintStart_toEndOf="@+id/textView11" />
+
+    <TextView
+        android:id="@+id/label_magnet_bias_Z"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="-119.875"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView10"
+        app:layout_constraintStart_toEndOf="@+id/textView10" />
 
     <TextView
         android:id="@+id/wifiInformationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="110dp"
         android:fontFamily="@font/roboto"
         android:text="WiFi Information Data"
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/deviceOrientationTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/MagneticFieldTitle" />
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="95dp"
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
-        android:text="Wifi Records:"
+        android:text="Number of APs:"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
@@ -422,60 +569,48 @@
         app:layout_constraintTop_toBottomOf="@+id/wifiInformationTitle" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="65dp"
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
+        android:layout_marginStart="23dp"
         android:fontFamily="@font/roboto"
-        android:text="Wifi APs:"
+        android:text="Scan Interval (s):"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/label_wifi_record_num"
-        app:layout_constraintStart_toEndOf="@+id/label_wifi_record_num" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_wifi_number_ap"
+        app:layout_constraintStart_toEndOf="@+id/label_wifi_number_ap" />
 
     <TextView
-        android:id="@+id/textView3"
-        android:layout_width="75dp"
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
-        android:text="Wifi Scan:"
+        android:text="Name (SSID):"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <TextView
-        android:id="@+id/textView11"
+        android:id="@+id/textView13"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
-        android:text="Scan Interval:"
+        android:text="RSSI (dBm):"
         android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/label_info_wifi"
-        app:layout_constraintStart_toEndOf="@+id/label_info_wifi" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
     <TextView
-        android:id="@+id/label_wifi_record_num"
-        android:layout_width="30dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:fontFamily="@font/roboto"
-        android:text="99"
-        android:textAlignment="textStart"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView"
-        app:layout_constraintStart_toEndOf="@+id/textView" />
-
-    <TextView
-        android:id="@+id/label_wifi_beacon_num"
+        android:id="@+id/label_wifi_number_ap"
         android:layout_width="30dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -488,57 +623,72 @@
         app:layout_constraintStart_toEndOf="@+id/textView2" />
 
     <TextView
-        android:id="@+id/label_info_wifi"
-        android:layout_width="70dp"
+        android:id="@+id/label_wifi_scan_interval"
+        android:layout_width="25dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="1000"
+        android:text="9.9"
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView3"
-        app:layout_constraintStart_toEndOf="@+id/textView3" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView"
+        app:layout_constraintStart_toEndOf="@+id/textView" />
 
     <TextView
-        android:id="@+id/label_info_wifi_interval"
-        android:layout_width="55dp"
+        android:id="@+id/label_wifi_SSID_name"
+        android:layout_width="222dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="1000"
-        android:textAlignment="textStart"
+        android:text="SFUNET_SECURE"
+        android:textAlignment="textEnd"
         android:textColor="#000000"
         android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView11"
-        app:layout_constraintStart_toEndOf="@+id/textView11" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView14"
+        app:layout_constraintStart_toEndOf="@+id/textView14" />
 
     <TextView
-        android:id="@+id/pedometerTitle"
-        android:layout_width="wrap_content"
+        android:id="@+id/label_wifi_RSSI"
+        android:layout_width="232dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="150dp"
+        android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="Pedometer Data"
-        android:textAlignment="textStart"
+        android:text="-99"
+        android:textAlignment="textEnd"
         android:textColor="#000000"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wifiInformationTitle" />
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView13"
+        app:layout_constraintStart_toEndOf="@+id/textView13" />
 
     <Button
         android:id="@+id/button_start_stop"
         android:layout_width="300dp"
-        android:layout_height="50dp"
+        android:layout_height="45dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="10dp"
+        android:background="#FFFFFF"
         android:fontFamily="@font/roboto_black"
         android:onClick="startStopRecording"
         android:text="@string/start_title"
         android:textAlignment="center"
         android:textColor="#3D5AFE"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/button_timer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_timer"
+        android:layout_width="300dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="#FFFFFF"
+        android:fontFamily="@font/roboto_black"
+        android:text="Ready"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/imageView1"
         app:layout_constraintEnd_toEndOf="parent"

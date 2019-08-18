@@ -16,11 +16,10 @@ import java.io.IOException;
 import java.security.KeyException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class WifiSession implements Runnable {
     public interface WifiScannerCallback {
-        void processWifiScanResult(final int recordNums, final int currentApNums);
+        void displayWifiScanMeasurements(final int currentApNums, final float currentScanInterval, final String nameSSID, final int RSSI);
     }
 
     // properties
@@ -34,7 +33,6 @@ public class WifiSession implements Runnable {
 
     private AtomicBoolean mIsRunning = new AtomicBoolean(false);
     private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
-    private AtomicInteger mNumScans = new AtomicInteger(0);
 
     private WifiManager mWifiManager;
     private WifiResultStreamer mFileStreamer;
@@ -60,9 +58,9 @@ public class WifiSession implements Runnable {
                 }
             }
 
-            // process wifi scan result in main class
-            int numScan = mNumScans.addAndGet(1);
-            mContext.processWifiScanResult(numScan, results.size());
+            // display Wifi scan results in main class
+            float currentScanInterval = ((float) mScanInterval / 1000.0f);
+            mContext.displayWifiScanMeasurements(results.size(), currentScanInterval, results.get(0).SSID, results.get(0).level);
         }
     };
 
@@ -116,7 +114,6 @@ public class WifiSession implements Runnable {
         }
         mIsWritingFile.set(false);
         mIsRunning.set(false);
-        mNumScans.set(0);
         mContext.unregisterReceiver(mScanReceiver);
         mHandler.removeCallbacks(null);
     }

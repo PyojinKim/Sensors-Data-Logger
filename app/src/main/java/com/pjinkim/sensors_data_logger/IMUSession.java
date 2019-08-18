@@ -45,11 +45,6 @@ public class IMUSession implements SensorEventListener {
     private float[] mGyroBias = new float[3];
     private float[] mMagnetBias = new float[3];
 
-    private float[] mAccelerometerReading = new float[3];
-    private float[] mMagnetometerReading = new float[3];
-    private float[] mRotationMatrix = new float[9];
-    private float[] mOrientationAngles = new float[3];
-
 
     // constructor
     public IMUSession(MainActivity context) {
@@ -178,7 +173,6 @@ public class IMUSession implements SensorEventListener {
                     mAcceMeasure[0] = sensorEvent.values[0];
                     mAcceMeasure[1] = sensorEvent.values[1];
                     mAcceMeasure[2] = sensorEvent.values[2];
-                    System.arraycopy(sensorEvent.values, 0, mAccelerometerReading, 0, mAccelerometerReading.length);
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
                     }
@@ -229,7 +223,6 @@ public class IMUSession implements SensorEventListener {
                     mMagnetMeasure[0] = sensorEvent.values[0];
                     mMagnetMeasure[1] = sensorEvent.values[1];
                     mMagnetMeasure[2] = sensorEvent.values[2];
-                    System.arraycopy(sensorEvent.values, 0, mMagnetometerReading, 0, mMagnetometerReading.length);
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet", 3, sensorEvent.values);
                     }
