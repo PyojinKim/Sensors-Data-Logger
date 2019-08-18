@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,6 +19,8 @@ import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -55,7 +58,10 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private TextView mLabelWifiAPNums, mLabelWifiScanInterval;
     private TextView mLabelWifiNameSSID, mLabelWifiRSSI;
 
-    private Button mStartStopButton, mTimerTextButton;
+    private Button mStartStopButton;
+    private TextView mLabelInterfaceTime;
+    private Timer mInterfaceTimer = new Timer();
+    private int mSecondCounter = 0;
 
 
     // Android activity lifecycle states
@@ -82,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         // monitor various sensor measurements
         displayIMUSensorMeasurements();
+        mLabelInterfaceTime.setText(R.string.ready_title);
     }
 
 
@@ -117,9 +124,28 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     // methods
     public void startStopRecording(View view) {
         if (!mIsRecording.get()) {
+
+            // start recording sensor measurements when button is pressed
             startRecording();
+
+            // start interface timer on display
+            mSecondCounter = 0;
+            mInterfaceTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mSecondCounter += 1;
+                    mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
+                }
+            }, 0, 1000);
+
         } else {
+
+            // stop recording sensor measurements when button is pressed
             stopRecording();
+
+            // stop interface timer on display
+            mInterfaceTimer.cancel();
+            mLabelInterfaceTime.setText(R.string.ready_title);
         }
     }
 
@@ -292,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mLabelWifiRSSI = (TextView) findViewById(R.id.label_wifi_RSSI);
 
         mStartStopButton = (Button) findViewById(R.id.button_start_stop);
+        mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
     }
 
 
@@ -359,5 +386,24 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mLabelWifiRSSI.setText(String.valueOf(RSSI));
             }
         });
+    }
+
+
+    private String interfaceIntTime(final int second) {
+
+        // check second input
+        if (second < 0) {
+            showAlertAndStop("Second cannot be negative.");
+        }
+
+        // extract hour, minute, second information from second
+        int input = second;
+        int hours = input / 3600;
+        input = input % 3600;
+        int mins = input / 60;
+        int secs = input % 60;
+
+        // return interface int time
+        return String.format(Locale.US, "%02d:%02d:%02d", hours, mins, secs);
     }
 }

@@ -675,24 +675,27 @@
         android:textAlignment="center"
         android:textColor="#3D5AFE"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_timer"
+        app:layout_constraintBottom_toTopOf="@+id/label_interface_time"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/button_timer"
+    <TextView
+        android:id="@+id/label_interface_time"
         android:layout_width="300dp"
         android:layout_height="45dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:background="#FFFFFF"
+        android:elegantTextHeight="false"
         android:fontFamily="@font/roboto_black"
-        android:text="Ready"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/imageView1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="@string/ready_title" />
 
     <ImageView
         android:id="@+id/imageView1"
