@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -36,13 +35,15 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.VIBRATE
     };
 
     private IMUConfig mConfig = new IMUConfig();
     private IMUSession mIMUSession;
     private WifiSession mWifiSession;
     private BatterySession mBatterySession;
+    private FLPSession mFLPSession;
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mIMUSession = new IMUSession(this);
         mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
+        mFLPSession = new FLPSession(this);
 
 
         // battery power setting
@@ -134,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 @Override
                 public void run() {
                     mSecondCounter += 1;
-                    mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
                 }
             }, 0, 1000);
 
@@ -167,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mIMUSession.startSession(outputFolder);
         mWifiSession.startSession(outputFolder);
         mBatterySession.startSession(outputFolder);
+        mFLPSession.startSession(outputFolder);
         mIsRecording.set(true);
 
         // update Start/Stop button UI
@@ -190,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mIMUSession.stopSession();
                 mWifiSession.stopSession();
                 mBatterySession.stopSession();
+                mFLPSession.stopSession();
                 mIsRecording.set(false);
 
                 // update screen UI and button
@@ -361,6 +364,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mLabelMagnetBiasX.setText(String.format(Locale.US, "%.3f", magnet_bias[0]));
                 mLabelMagnetBiasY.setText(String.format(Locale.US, "%.3f", magnet_bias[1]));
                 mLabelMagnetBiasZ.setText(String.format(Locale.US, "%.3f", magnet_bias[2]));
+
+                mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
             }
         });
 
