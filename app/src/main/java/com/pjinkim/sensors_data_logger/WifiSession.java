@@ -25,7 +25,7 @@ public class WifiSession implements Runnable {
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 1000;
+    private final static int DEFAULT_INTERVAL = 30 * 1000; // milli second
     private int mScanInterval = DEFAULT_INTERVAL;
 
     private MainActivity mContext;

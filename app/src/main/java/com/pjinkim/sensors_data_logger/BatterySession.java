@@ -20,7 +20,7 @@ public class BatterySession implements Runnable {
     // properties
     private final static String LOG_TAG = BatterySession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 1000;
+    private final static int DEFAULT_INTERVAL = 60 * 1000; // milli second
     private int mBatteryInterval = DEFAULT_INTERVAL;
 
     private MainActivity mContext;
