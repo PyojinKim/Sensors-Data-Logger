@@ -10,7 +10,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -24,6 +26,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    implementation 'com.google.tango:sdk-base:1.55'
+    implementation 'com.google.tango:sdk-support:1.55'
+    implementation 'com.google.tango:sdk-reconstruction:1.55'
+    implementation 'com.google.tango:sdk-ux:1.55'
+    implementation 'org.rajawali3d:rajawali:1.0.325@aar'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
