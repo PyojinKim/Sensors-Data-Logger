@@ -13,6 +13,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.pjinkim.sensors_data_logger.fio.FileStreamer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

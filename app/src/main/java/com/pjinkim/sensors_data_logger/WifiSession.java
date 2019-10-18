@@ -11,6 +11,8 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.pjinkim.sensors_data_logger.fio.FileStreamer;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.security.KeyException;

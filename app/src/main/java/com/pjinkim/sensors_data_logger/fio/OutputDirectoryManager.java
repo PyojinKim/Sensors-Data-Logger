@@ -1,4 +1,4 @@
-package com.pjinkim.sensors_data_logger;
+package com.pjinkim.sensors_data_logger.fio;
 
 import android.os.Environment;
 import android.util.Log;

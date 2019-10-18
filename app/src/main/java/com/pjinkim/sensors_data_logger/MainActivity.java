@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.pjinkim.sensors_data_logger.fio.OutputDirectoryManager;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;

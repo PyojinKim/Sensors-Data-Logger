@@ -1,14 +1,13 @@
 package com.pjinkim.sensors_data_logger;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.pjinkim.sensors_data_logger.fio.FileStreamer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

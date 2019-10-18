@@ -7,20 +7,18 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
-import java.io.BufferedWriter;
+import com.pjinkim.sensors_data_logger.fio.FileStreamer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.security.Key;
 import java.security.KeyException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IMUSession implements SensorEventListener {
