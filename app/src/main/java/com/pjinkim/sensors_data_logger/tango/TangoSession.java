@@ -7,10 +7,14 @@ import android.util.Log;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
 import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoEvent;
 import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.TangoXyzIjData;
 import com.google.tango.support.TangoSupport;
 import com.pjinkim.sensors_data_logger.fio.FileStreamer;
 import com.pjinkim.sensors_data_logger.MainActivity;
@@ -43,6 +47,9 @@ public class TangoSession {
     private AtomicBoolean mIsLocalizedToADF = new AtomicBoolean(false);
     private AtomicBoolean mIsTangoConnected = new AtomicBoolean(false);
     private AtomicInteger mLocalizeCounter = new AtomicInteger(0);
+
+    private AtomicBoolean mIsAreaLearningMode = new AtomicBoolean(true);
+    private AtomicBoolean mIsADFEnabled = new AtomicBoolean(false);
 
     private Tango mTango;
     private HashMap<String, String> mAdfList = new HashMap<>();
@@ -98,10 +105,34 @@ public class TangoSession {
     }
 
 
+    public void stopSession() {
 
+        // close text file and reset variables
+        if (mIsWritingFile.get()) {
+            try {
+                mFileStreamer.endFiles();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        mIsWritingFile.set(false);
+        mIsRunning.set(false);
 
-
-
+        //
+        mIsTangoConnected.set(false);
+        updateADFList();
+        synchronized (this) {
+            mTango.disconnect();
+        }
+        mTango = new Tango(mContext, new Runnable() {
+            @Override
+            public void run() {
+                TangoSupport.initialize(mTango);
+            }
+        });
+        mIsLocalizedToADF.set(false);
+        mLocalizeCounter.set(0);
+    }
 
     /**
      * Set up the callback listeners for the Tango Service and obtain other parameters required
@@ -110,9 +141,62 @@ public class TangoSession {
      */
     private void startupTango() {
 
+        // select coordinate frame pair
+        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        if (mIsADFEnabled.get()) {
+            framePairs.add(new TangoCoordinateFramePair(
+                    TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                    TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
+            framePairs.add(new TangoCoordinateFramePair(
+                    TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                    TangoPoseData.COORDINATE_FRAME_DEVICE));
+        }
+
+        // Tango callback functions
+        mIsLocalizedToADF.set(false);
+        mLocalizeCounter.set(0);
+        final int minLocalized = 10;
+        mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
+            @Override
+            public void onPoseAvailable(TangoPoseData pose) {
+
+                // save pure odometry results regardless whether ADF is enabled or not
+                if ((pose.baseFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) && (pose.targetFrame == TangoPoseData.COORDINATE_FRAME_DEVICE)
+                        && (pose.statusCode == TangoPoseData.POSE_VALID) && (mIsWritingFile.get())) {
+                    try {
+                        mFileStreamer.addPoseRecord(pose);
+                    } catch (IOException | KeyException e) {
+                        Log.e(LOG_TAG, "onPoseAvailable: Cannot add the pose result to file");
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onXyzIjAvailable(TangoXyzIjData xyzIj) {
+                super.onXyzIjAvailable(xyzIj);
+            }
+
+            @Override
+            public void onFrameAvailable(int cameraId) {
+                super.onFrameAvailable(cameraId);
+            }
+
+            @Override
+            public void onTangoEvent(TangoEvent event) {
+                super.onTangoEvent(event);
+            }
+
+            @Override
+            public void onPointCloudAvailable(TangoPointCloudData pointCloud) {
+                super.onPointCloudAvailable(pointCloud);
+            }
+        });
     }
-
-
 
 
 
@@ -129,7 +213,9 @@ public class TangoSession {
         tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_AUTORECOVERY, true);
 
         // area learning setting
-        tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, true);
+        if (mIsAreaLearningMode.get()) {
+            tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, true);
+        }
 
         // depth perception setting
 
