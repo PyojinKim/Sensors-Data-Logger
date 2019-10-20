@@ -1,7 +1,6 @@
 package com.pjinkim.sensors_data_logger.tango;
 
 import android.content.Context;
-import android.location.Location;
 import android.util.Log;
 
 import com.google.atap.tangoservice.Tango;
@@ -18,6 +17,7 @@ import com.google.atap.tangoservice.TangoXyzIjData;
 import com.google.tango.support.TangoSupport;
 import com.pjinkim.sensors_data_logger.fio.FileStreamer;
 import com.pjinkim.sensors_data_logger.MainActivity;
+import com.pjinkim.sensors_data_logger.rajawali.ScenePoseCalculator;
 
 import org.rajawali3d.math.Matrix4;
 
@@ -29,17 +29,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Handler;
 
 public class TangoSession {
 
     // properties
     private final static String LOG_TAG = TangoSession.class.getName();
-
     private final static float mulNanoToSec = 1000000000;
 
     private MainActivity mContext;
-    private Handler mHandler = new Handler();
 
     private AtomicBoolean mIsRunning = new AtomicBoolean(false);
     private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
@@ -118,7 +115,7 @@ public class TangoSession {
         mIsWritingFile.set(false);
         mIsRunning.set(false);
 
-        //
+        // perform initialization each time a recording is ended.
         mIsTangoConnected.set(false);
         updateADFList();
         synchronized (this) {
@@ -134,11 +131,8 @@ public class TangoSession {
         mLocalizeCounter.set(0);
     }
 
-    /**
-     * Set up the callback listeners for the Tango Service and obtain other parameters required
-     * after Tango connection.
-     * Listen to updates from the point cloud.
-     */
+
+    // set up the Tango API callback listeners for the Tango Service
     private void startupTango() {
 
         // select coordinate frame pair
@@ -199,8 +193,6 @@ public class TangoSession {
     }
 
 
-
-
     private TangoConfig setupTangoConfig(Tango tango) {
 
         // default configuration for Tango service
@@ -224,8 +216,26 @@ public class TangoSession {
     }
 
 
+    public Matrix4 getLatestPoseMatrix() {
 
+        // obtain the latest tango pose
+        Matrix4 mLatestPose = new Matrix4();
+        if (mIsTangoConnected.get()) {
+            try {
+                TangoPoseData pose = mTango.getPoseAtTime(0, new TangoCoordinateFramePair(
+                        TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE, TangoPoseData.COORDINATE_FRAME_DEVICE));
+                mLatestPose = ScenePoseCalculator.tangoPoseToMatrix(pose);
+                if (mIsLocalizedToADF.get()) {
+                    mLatestPose.leftMultiply(mInitialTransform);
+                }
+            } catch (TangoInvalidException e) {
+                e.printStackTrace();
+            }
+        }
 
+        // return the current tango pose
+        return mLatestPose;
+    }
 
 
     public void updateADFList() {
@@ -315,6 +325,29 @@ public class TangoSession {
         return mTango;
     }
 
+    public boolean isTangoConnected() {
+        return mIsTangoConnected.get();
+    }
 
+    public boolean isTangoInitialized() {
+        return mIsTangoInitialized.get();
+    }
 
+    static public String tangoPoseToString(final TangoPoseData pose) {
+        return String.format(Locale.US, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f",
+                (long) (pose.timestamp * mulNanoToSec), pose.translation[0], pose.translation[1], pose.translation[2],
+                pose.rotation[0], pose.rotation[1], pose.rotation[2], pose.rotation[3]);
+    }
+
+    public HashMap<String, String> getADFList() {
+        return mAdfList;
+    }
+
+    public String getAdfName(final String uuid) {
+        if (mAdfList.containsKey(uuid)) {
+            return mAdfList.get(uuid);
+        } else {
+            return "N/A";
+        }
+    }
 }

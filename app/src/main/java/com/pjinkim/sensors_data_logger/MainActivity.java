@@ -16,7 +16,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.atap.tangoservice.Tango;
 import com.pjinkim.sensors_data_logger.fio.OutputDirectoryManager;
+import com.pjinkim.sensors_data_logger.tango.TangoSession;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private final static String LOG_TAG = MainActivity.class.getName();
 
     private final static int REQUEST_CODE_ANDROID = 1001;
+    private final static int REQUEST_CODE_AREA_LEARNING = 1002;
     private static String[] REQUIRED_PERMISSIONS = new String[] {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -38,7 +41,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.VIBRATE
+            Manifest.permission.VIBRATE,
+            Manifest.permission.CAMERA
     };
 
     private IMUConfig mConfig = new IMUConfig();
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private WifiSession mWifiSession;
     private BatterySession mBatterySession;
     private FLPSession mFLPSession;
+    private TangoSession mTangoSession;
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
@@ -82,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
         mFLPSession = new FLPSession(this);
+        mTangoSession = new TangoSession(this);
 
 
         // battery power setting
@@ -99,9 +105,23 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     @Override
     protected void onResume() {
         super.onResume();
+
+        // request Android permission
         if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_ANDROID);
         }
+
+        // request Tango permission
+        if (!Tango.hasPermission(this, Tango.PERMISSIONTYPE_ADF_LOAD_SAVE)) {
+            startActivityForResult(
+                    Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE),
+                    REQUEST_CODE_AREA_LEARNING
+            );
+        }
+        if (mTangoSession.isInitialized()) {
+            mTangoSession.updateADFList();
+        }
+
         updateConfig();
     }
 
@@ -171,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mWifiSession.startSession(outputFolder);
         mBatterySession.startSession(outputFolder);
         mFLPSession.startSession(outputFolder);
+        mTangoSession.startSession(outputFolder);
         mIsRecording.set(true);
 
         // update Start/Stop button UI
@@ -195,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mWifiSession.stopSession();
                 mBatterySession.stopSession();
                 mFLPSession.stopSession();
+                mTangoSession.stopSession();
                 mIsRecording.set(false);
 
                 // update screen UI and button
