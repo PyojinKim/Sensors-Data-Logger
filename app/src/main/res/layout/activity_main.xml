@@ -20,6 +20,74 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="# of Points:  "
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appName" />
+
+    <TextView
+        android:id="@+id/label_Tango_point_count"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="999999"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView8"
+        app:layout_constraintStart_toEndOf="@+id/textView8" />
+
+    <Button
+        android:id="@+id/first_person_button"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/third_person_button"
+        android:layout_alignLeft="@+id/third_person_button"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="8dp"
+        android:onClick="onFirstPersonClicked"
+        android:paddingRight="5dp"
+        android:text="@string/first_person"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appName" />
+
+    <Button
+        android:id="@+id/third_person_button"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/top_down_button"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="5dp"
+        android:onClick="onThirdPersonClicked"
+        android:paddingRight="5dp"
+        android:text="@string/third_person"
+        app:layout_constraintStart_toStartOf="@+id/first_person_button"
+        app:layout_constraintTop_toBottomOf="@+id/first_person_button" />
+
+    <Button
+        android:id="@+id/top_down_button"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp"
+        android:onClick="onTopDownClicked"
+        android:paddingRight="5dp"
+        android:text="@string/top_down"
+        app:layout_constraintStart_toStartOf="@+id/third_person_button"
+        app:layout_constraintTop_toBottomOf="@+id/third_person_button" />
+
+    <TextView
         android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -238,11 +306,11 @@
 
     <TextView
         android:id="@+id/label_wifi_scan_interval"
-        android:layout_width="25dp"
+        android:layout_width="35dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto"
-        android:text="9.9"
+        android:text="99.9"
         android:textAlignment="textStart"
         android:textColor="#000000"
         android:textSize="16sp"

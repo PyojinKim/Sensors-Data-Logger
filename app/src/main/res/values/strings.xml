@@ -6,4 +6,8 @@
     <string name="detach_title">Detach</string>
     <string name="stop_title">Stop</string>
     <string name="write_file">File</string>
+
+    <string name="first_person">First</string>
+    <string name="third_person">Third</string>
+    <string name="top_down">Top</string>
 </resources>

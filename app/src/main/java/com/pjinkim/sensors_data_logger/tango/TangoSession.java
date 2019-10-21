@@ -14,6 +14,7 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
+import com.google.tango.support.TangoPointCloudManager;
 import com.google.tango.support.TangoSupport;
 import com.pjinkim.sensors_data_logger.fio.FileStreamer;
 import com.pjinkim.sensors_data_logger.MainActivity;
@@ -35,6 +36,8 @@ public class TangoSession {
     // properties
     private final static String LOG_TAG = TangoSession.class.getName();
     private final static float mulNanoToSec = 1000000000;
+    private final static int SECS_TO_MILLISECS = 1000;
+    private final static double UPDATE_INTERVAL_MS = 100.0;
 
     private MainActivity mContext;
 
@@ -49,9 +52,16 @@ public class TangoSession {
     private AtomicBoolean mIsADFEnabled = new AtomicBoolean(false);
 
     private Tango mTango;
+    private TangoPointCloudManager mPointCloudManager;
     private HashMap<String, String> mAdfList = new HashMap<>();
     private Matrix4 mInitialTransform = new Matrix4();
     private TangoResultStreamer mFileStreamer;
+
+    private double mPointCloudPreviousTimeStamp = 0.0;
+    private double mPointCloudTimeToNextUpdate = UPDATE_INTERVAL_MS;
+    private int mPointCount = 0;
+    private TangoPointCloudData mPointCloud = null;
+    private float[] mPointCloudTransform = null;
 
 
     // constructor
@@ -72,6 +82,7 @@ public class TangoSession {
                 }
             }
         });
+        this.mPointCloudManager = new TangoPointCloudManager();
     }
 
 
@@ -146,7 +157,6 @@ public class TangoSession {
         // Tango callback functions
         mIsLocalizedToADF.set(false);
         mLocalizeCounter.set(0);
-        final int minLocalized = 10;
         mTango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
             @Override
             public void onPoseAvailable(TangoPoseData pose) {
@@ -180,7 +190,20 @@ public class TangoSession {
 
             @Override
             public void onPointCloudAvailable(TangoPointCloudData pointCloud) {
-                super.onPointCloudAvailable(pointCloud);
+
+                // update current point cloud
+                mPointCloudManager.updatePointCloud(pointCloud);
+                updateLatestPointCloud();
+
+                // update current # of points
+                final double currentTimeStamp = pointCloud.timestamp;
+                final double pointCloudFrameDelta = (currentTimeStamp - mPointCloudPreviousTimeStamp) * SECS_TO_MILLISECS;
+                mPointCloudPreviousTimeStamp = currentTimeStamp;
+                mPointCloudTimeToNextUpdate -= pointCloudFrameDelta;
+                if (mPointCloudTimeToNextUpdate < 0.0) {
+                    mPointCloudTimeToNextUpdate = UPDATE_INTERVAL_MS;
+                    mPointCount = pointCloud.numPoints;
+                }
             }
         });
     }
@@ -203,8 +226,10 @@ public class TangoSession {
         }
 
         // depth perception setting
+        tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+        tangoConfig.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
 
-        //
+        // return Tango configuration
         return tangoConfig;
     }
 
@@ -228,6 +253,28 @@ public class TangoSession {
 
         // return the current tango pose
         return mLatestPose;
+    }
+
+
+    public void updateLatestPointCloud() {
+
+        // obtain point cloud data
+        TangoPointCloudData pointCloud = mPointCloudManager.getLatestPointCloud();
+        if (pointCloud != null) {
+            TangoSupport.MatrixTransformData transform =
+                    TangoSupport.getMatrixTransformAtTime(pointCloud.timestamp,
+                            TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                            TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                            TangoSupport.ENGINE_OPENGL,
+                            TangoSupport.ENGINE_TANGO,
+                            TangoSupport.ROTATION_IGNORED);
+
+            // update point cloud data
+            if (transform.statusCode == TangoPoseData.POSE_VALID) {
+                mPointCloud = pointCloud;
+                mPointCloudTransform = transform.matrix;
+            }
+        }
     }
 
 
@@ -312,6 +359,18 @@ public class TangoSession {
     // getter and setter
     public boolean isInitialized() {
         return mIsTangoInitialized.get();
+    }
+
+    public int getPointCount() {
+        return mPointCount;
+    }
+
+    public TangoPointCloudData getPointCloud() {
+        return mPointCloud;
+    }
+
+    public float[] getPointCloudTransform() {
+        return mPointCloudTransform;
     }
 
     public Tango getTango(){

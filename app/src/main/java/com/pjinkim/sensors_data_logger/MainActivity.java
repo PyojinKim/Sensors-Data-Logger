@@ -16,11 +16,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.TangoPointCloudData;
 import com.pjinkim.sensors_data_logger.fio.OutputDirectoryManager;
 import com.pjinkim.sensors_data_logger.rajawali.MotionRajawaliRenderer;
 import com.pjinkim.sensors_data_logger.rajawali.ScenePoseCalculator;
@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
     private TextView mLabelWifiAPNums, mLabelWifiScanInterval;
     private TextView mLabelFLPLatitude, mLabelFLPLongitude, mLabelFLPAccuracy;
+    private TextView mLabelTangoPointCount;
 
     private Button mStartStopButton;
     private TextView mLabelInterfaceTime;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize screen labels and buttons
+        // initialize screen labels and buttons, configure OpenGL renderer
         initializeViews();
         mRenderer = new MotionRajawaliRenderer(this);
         setupRenderer();
@@ -348,6 +349,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.gl_surface_view);
 
+        mLabelTangoPointCount = (TextView) findViewById(R.id.label_Tango_point_count);
+
         mLabelFLPLatitude = (TextView) findViewById(R.id.label_FLP_latitude);
         mLabelFLPLongitude = (TextView) findViewById(R.id.label_FLP_longitude);
         mLabelFLPAccuracy = (TextView) findViewById(R.id.label_FLP_accuracy);
@@ -371,7 +374,9 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
     }
 
-
+    /**
+     * Sets Rajawali surface view and its renderer. This is ideally called only once in onCreate.
+     */
     private void setupRenderer() {
 
         // Tango motion renderer
@@ -387,6 +392,13 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                     Matrix4 pose = mTangoSession.getLatestPoseMatrix();
                     pose.leftMultiply(ScenePoseCalculator.OPENGL_T_TANGO_WORLD);
                     mRenderer.updateCameraPoseFromMatrix(pose);
+
+                    // update current point cloud
+                    TangoPointCloudData pointCloud = mTangoSession.getPointCloud();
+                    float[] transformMatrix = mTangoSession.getPointCloudTransform();
+                    if ((pointCloud != null) && (transformMatrix != null)) {
+                        mRenderer.updatePointCloud(pointCloud, transformMatrix);
+                    }
                 }
             }
 
@@ -411,6 +423,21 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     }
 
 
+    public void onFirstPersonClicked(View v) {
+        mRenderer.setFirstPersonView();
+    }
+
+
+    public void onThirdPersonClicked(View v) {
+        mRenderer.setThirdPersonView();
+    }
+
+
+    public void onTopDownClicked(View v) {
+        mRenderer.setTopDownView();
+    }
+
+
     private void displaySensorMeasurements() {
 
         // get IMU sensor measurements from IMUSession
@@ -421,10 +448,15 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         // get FLP measurements from FLPSession
         final Location FLP_data = mFLPSession.getCurrentLocation();
 
+        // get Tango measurements from TangoSession
+        final int Tango_data = mTangoSession.getPointCount();
+
         // update current screen (activity)
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                mLabelTangoPointCount.setText(Integer.toString(Tango_data));
 
                 //mLabelFLPLatitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLatitude()));
                 //mLabelFLPLongitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLongitude()));
