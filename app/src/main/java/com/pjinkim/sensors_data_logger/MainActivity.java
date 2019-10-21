@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -324,6 +326,19 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 showToast("Permission not granted");
                 finish();
                 return;
+            }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        // Tango area learning mode permission
+        if (requestCode == REQUEST_CODE_AREA_LEARNING) {
+            if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Area learning permission required.", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }
