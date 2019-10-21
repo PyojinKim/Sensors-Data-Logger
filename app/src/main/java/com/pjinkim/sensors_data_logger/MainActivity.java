@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,7 +20,13 @@ import androidx.core.content.ContextCompat;
 
 import com.google.atap.tangoservice.Tango;
 import com.pjinkim.sensors_data_logger.fio.OutputDirectoryManager;
+import com.pjinkim.sensors_data_logger.rajawali.MotionRajawaliRenderer;
+import com.pjinkim.sensors_data_logger.rajawali.ScenePoseCalculator;
 import com.pjinkim.sensors_data_logger.tango.TangoSession;
+
+import org.rajawali3d.math.Matrix4;
+import org.rajawali3d.scene.ASceneFrameCallback;
+import org.rajawali3d.surface.RajawaliSurfaceView;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -56,15 +64,15 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private PowerManager.WakeLock mWakeLock;
 
+    private MotionRajawaliRenderer mRenderer;
+    private org.rajawali3d.surface.RajawaliSurfaceView mSurfaceView;
+
     private TextView mLabelAccelDataX, mLabelAccelDataY, mLabelAccelDataZ;
-    private TextView mLabelAccelBiasX, mLabelAccelBiasY, mLabelAccelBiasZ;
     private TextView mLabelGyroDataX, mLabelGyroDataY, mLabelGyroDataZ;
-    private TextView mLabelGyroBiasX, mLabelGyroBiasY, mLabelGyroBiasZ;
     private TextView mLabelMagnetDataX, mLabelMagnetDataY, mLabelMagnetDataZ;
-    private TextView mLabelMagnetBiasX, mLabelMagnetBiasY, mLabelMagnetBiasZ;
 
     private TextView mLabelWifiAPNums, mLabelWifiScanInterval;
-    private TextView mLabelWifiNameSSID, mLabelWifiRSSI;
+    private TextView mLabelFLPLatitude, mLabelFLPLongitude, mLabelFLPAccuracy;
 
     private Button mStartStopButton;
     private TextView mLabelInterfaceTime;
@@ -80,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         // initialize screen labels and buttons
         initializeViews();
+        mRenderer = new MotionRajawaliRenderer(this);
+        setupRenderer();
 
 
         // setup sessions
@@ -97,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
 
         // monitor various sensor measurements
-        displayIMUSensorMeasurements();
+        displaySensorMeasurements();
         mLabelInterfaceTime.setText(R.string.ready_title);
     }
 
@@ -167,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             stopRecording();
 
             // stop interface timer on display
+            mSecondCounter = 0;
             mInterfaceTimer.cancel();
             mLabelInterfaceTime.setText(R.string.ready_title);
         }
@@ -280,10 +291,15 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                 mStartStopButton.setText(R.string.start_title);
                 mLabelWifiAPNums.setText("N/A");
                 mLabelWifiScanInterval.setText("0");
-                mLabelWifiNameSSID.setText("N/A");
-                mLabelWifiRSSI.setText("N/A");
             }
         });
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        mRenderer.onTouchEvent(motionEvent);
+        return true;
     }
 
 
@@ -315,79 +331,101 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
     private void initializeViews() {
 
+        mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.gl_surface_view);
+
+        mLabelFLPLatitude = (TextView) findViewById(R.id.label_FLP_latitude);
+        mLabelFLPLongitude = (TextView) findViewById(R.id.label_FLP_longitude);
+        mLabelFLPAccuracy = (TextView) findViewById(R.id.label_FLP_accuracy);
+
+        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_number_ap);
+        mLabelWifiScanInterval = (TextView) findViewById(R.id.label_wifi_scan_interval);
+
         mLabelAccelDataX = (TextView) findViewById(R.id.label_accel_X);
         mLabelAccelDataY = (TextView) findViewById(R.id.label_accel_Y);
         mLabelAccelDataZ = (TextView) findViewById(R.id.label_accel_Z);
-
-        mLabelAccelBiasX = (TextView) findViewById(R.id.label_accel_bias_X);
-        mLabelAccelBiasY = (TextView) findViewById(R.id.label_accel_bias_Y);
-        mLabelAccelBiasZ = (TextView) findViewById(R.id.label_accel_bias_Z);
 
         mLabelGyroDataX = (TextView) findViewById(R.id.label_gyro_X);
         mLabelGyroDataY = (TextView) findViewById(R.id.label_gyro_Y);
         mLabelGyroDataZ = (TextView) findViewById(R.id.label_gyro_Z);
 
-        mLabelGyroBiasX = (TextView) findViewById(R.id.label_gyro_bias_X);
-        mLabelGyroBiasY = (TextView) findViewById(R.id.label_gyro_bias_Y);
-        mLabelGyroBiasZ = (TextView) findViewById(R.id.label_gyro_bias_Z);
-
         mLabelMagnetDataX = (TextView) findViewById(R.id.label_magnet_X);
         mLabelMagnetDataY = (TextView) findViewById(R.id.label_magnet_Y);
         mLabelMagnetDataZ = (TextView) findViewById(R.id.label_magnet_Z);
-
-        mLabelMagnetBiasX = (TextView) findViewById(R.id.label_magnet_bias_X);
-        mLabelMagnetBiasY = (TextView) findViewById(R.id.label_magnet_bias_Y);
-        mLabelMagnetBiasZ = (TextView) findViewById(R.id.label_magnet_bias_Z);
-
-        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_number_ap);
-        mLabelWifiScanInterval = (TextView) findViewById(R.id.label_wifi_scan_interval);
-        mLabelWifiNameSSID = (TextView) findViewById(R.id.label_wifi_SSID_name);
-        mLabelWifiRSSI = (TextView) findViewById(R.id.label_wifi_RSSI);
 
         mStartStopButton = (Button) findViewById(R.id.button_start_stop);
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
     }
 
 
-    private void displayIMUSensorMeasurements() {
+    private void setupRenderer() {
+
+        // Tango motion renderer
+        mSurfaceView.setEGLContextClientVersion(2);
+        mRenderer.getCurrentScene().registerFrameCallback(new ASceneFrameCallback() {
+            @Override
+            public void onPreFrame(long sceneTime, double deltaTime) {
+
+                // execute the block with only one thread
+                synchronized (MainActivity.this) {
+
+                    // update current camera pose
+                    Matrix4 pose = mTangoSession.getLatestPoseMatrix();
+                    pose.leftMultiply(ScenePoseCalculator.OPENGL_T_TANGO_WORLD);
+                    mRenderer.updateCameraPoseFromMatrix(pose);
+                }
+            }
+
+            @Override
+            public boolean callPreFrame() {
+                return true;
+            }
+
+            @Override
+            public void onPreDraw(long sceneTime, double deltaTime) {
+
+            }
+
+            @Override
+            public void onPostFrame(long sceneTime, double deltaTime) {
+
+            }
+        });
+
+        // render with surface view
+        mSurfaceView.setSurfaceRenderer(mRenderer);
+    }
+
+
+    private void displaySensorMeasurements() {
 
         // get IMU sensor measurements from IMUSession
         final float[] acce_data = mIMUSession.getAcceMeasure();
-        final float[] acce_bias = mIMUSession.getAcceBias();
-
         final float[] gyro_data = mIMUSession.getGyroMeasure();
-        final float[] gyro_bias = mIMUSession.getGyroBias();
-
         final float[] magnet_data = mIMUSession.getMagnetMeasure();
-        final float[] magnet_bias = mIMUSession.getMagnetBias();
+
+        // get FLP measurements from FLPSession
+        final Location FLP_data = mFLPSession.getCurrentLocation();
 
         // update current screen (activity)
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                //mLabelFLPLatitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLatitude()));
+                //mLabelFLPLongitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLongitude()));
+                //mLabelFLPAccuracy.setText(String.format(Locale.US, "%.2f", FLP_data.getAccuracy()));
+
                 mLabelAccelDataX.setText(String.format(Locale.US, "%.3f", acce_data[0]));
                 mLabelAccelDataY.setText(String.format(Locale.US, "%.3f", acce_data[1]));
                 mLabelAccelDataZ.setText(String.format(Locale.US, "%.3f", acce_data[2]));
-
-                mLabelAccelBiasX.setText(String.format(Locale.US, "%.3f", acce_bias[0]));
-                mLabelAccelBiasY.setText(String.format(Locale.US, "%.3f", acce_bias[1]));
-                mLabelAccelBiasZ.setText(String.format(Locale.US, "%.3f", acce_bias[2]));
 
                 mLabelGyroDataX.setText(String.format(Locale.US, "%.3f", gyro_data[0]));
                 mLabelGyroDataY.setText(String.format(Locale.US, "%.3f", gyro_data[1]));
                 mLabelGyroDataZ.setText(String.format(Locale.US, "%.3f", gyro_data[2]));
 
-                mLabelGyroBiasX.setText(String.format(Locale.US, "%.3f", gyro_bias[0]));
-                mLabelGyroBiasY.setText(String.format(Locale.US, "%.3f", gyro_bias[1]));
-                mLabelGyroBiasZ.setText(String.format(Locale.US, "%.3f", gyro_bias[2]));
-
                 mLabelMagnetDataX.setText(String.format(Locale.US, "%.3f", magnet_data[0]));
                 mLabelMagnetDataY.setText(String.format(Locale.US, "%.3f", magnet_data[1]));
                 mLabelMagnetDataZ.setText(String.format(Locale.US, "%.3f", magnet_data[2]));
-
-                mLabelMagnetBiasX.setText(String.format(Locale.US, "%.3f", magnet_bias[0]));
-                mLabelMagnetBiasY.setText(String.format(Locale.US, "%.3f", magnet_bias[1]));
-                mLabelMagnetBiasZ.setText(String.format(Locale.US, "%.3f", magnet_bias[2]));
 
                 mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
             }
@@ -398,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                displayIMUSensorMeasurements();
+                displaySensorMeasurements();
             }
         }, displayInterval);
     }
@@ -411,8 +449,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             public void run() {
                 mLabelWifiAPNums.setText(String.valueOf(currentApNums));
                 mLabelWifiScanInterval.setText(String.format(Locale.US, "%.1f", currentScanInterval));
-                mLabelWifiNameSSID.setText(String.valueOf(nameSSID));
-                mLabelWifiRSSI.setText(String.valueOf(RSSI));
             }
         });
     }

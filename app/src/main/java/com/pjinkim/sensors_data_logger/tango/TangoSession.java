@@ -63,7 +63,6 @@ public class TangoSession {
                 try {
                     TangoSupport.initialize(mTango);
                     mIsTangoInitialized.set(true);
-                    updateADFList();
                 } catch (TangoOutOfDateException e) {
                     Log.e(LOG_TAG, "Out of date.");
                 } catch (TangoErrorException e) {
@@ -121,12 +120,6 @@ public class TangoSession {
         synchronized (this) {
             mTango.disconnect();
         }
-        mTango = new Tango(mContext, new Runnable() {
-            @Override
-            public void run() {
-                TangoSupport.initialize(mTango);
-            }
-        });
         mIsLocalizedToADF.set(false);
         mLocalizeCounter.set(0);
     }
@@ -295,8 +288,8 @@ public class TangoSession {
                 // record Tango 6-DoF pose information in text file
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(timestamp); // nano seconds since boot
-                stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f %.6f", rotation[0], rotation[1], rotation[2], rotation[3]));
-                stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f", translation[0], translation[1], translation[2]));
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f %.6f", rotation[0], rotation[1], rotation[2], rotation[3])); // qx qy qz qw
+                stringBuilder.append(String.format(Locale.US, " %.6f %.6f %.6f", translation[0], translation[1], translation[2]));          // tx ty tz
                 stringBuilder.append(" \n");
                 mPoseWriter.write(stringBuilder.toString());
             }
