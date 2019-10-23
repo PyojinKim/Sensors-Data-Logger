@@ -38,7 +38,9 @@ public class FLPSession {
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
+    private double mCurrentLatitude = 0.0;
+    private double mCurrentLongitude = 0.0;
+    private float mCurrentAccuracy = 0;
     private FLPResultStreamer mFileStreamer;
     private LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -56,7 +58,9 @@ public class FLPSession {
                     // the last location in the list is the newest one
                     Location location = locationList.get(locationList.size() - 1);
                     mFileStreamer.addFLPRecord(location);
-                    mCurrentLocation = location;
+                    mCurrentLatitude = location.getLatitude();
+                    mCurrentLongitude = location.getLongitude();
+                    mCurrentAccuracy = location.getAccuracy();
                 } catch (IOException | KeyException e) {
                     Log.e(LOG_TAG, "onLocationResult: Cannot add the location result to file");
                     e.printStackTrace();
@@ -176,8 +180,16 @@ public class FLPSession {
 
 
     // getter and setter
-    public Location getCurrentLocation() {
-        return mCurrentLocation;
+    public double getCurrentLatitude() {
+        return mCurrentLatitude;
+    }
+
+    public double getCurrentLongitude() {
+        return mCurrentLongitude;
+    }
+
+    public float getCurrentAccuracy() {
+        return mCurrentAccuracy;
     }
 
     public boolean isRunning() {

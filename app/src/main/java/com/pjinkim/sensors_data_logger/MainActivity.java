@@ -446,21 +446,23 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         final float[] magnet_data = mIMUSession.getMagnetMeasure();
 
         // get FLP measurements from FLPSession
-        final Location FLP_data = mFLPSession.getCurrentLocation();
+        final double FLP_latitude_data = mFLPSession.getCurrentLatitude();
+        final double FLP_longitude_data = mFLPSession.getCurrentLongitude();
+        final float FLP_accuracy_data = mFLPSession.getCurrentAccuracy();
 
         // get Tango measurements from TangoSession
-        final int Tango_data = mTangoSession.getPointCount();
+        final int Tango_point_count_data = mTangoSession.getPointCount();
 
         // update current screen (activity)
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                mLabelTangoPointCount.setText(Integer.toString(Tango_data));
+                mLabelTangoPointCount.setText(Integer.toString(Tango_point_count_data));
 
-                //mLabelFLPLatitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLatitude()));
-                //mLabelFLPLongitude.setText(String.format(Locale.US, "%.2f", FLP_data.getLongitude()));
-                //mLabelFLPAccuracy.setText(String.format(Locale.US, "%.2f", FLP_data.getAccuracy()));
+                mLabelFLPLatitude.setText(String.format(Locale.US, "%.2f", FLP_latitude_data));
+                mLabelFLPLongitude.setText(String.format(Locale.US, "%.2f", FLP_longitude_data));
+                mLabelFLPAccuracy.setText(String.format(Locale.US, "%.2f", FLP_accuracy_data));
 
                 mLabelAccelDataX.setText(String.format(Locale.US, "%.3f", acce_data[0]));
                 mLabelAccelDataY.setText(String.format(Locale.US, "%.3f", acce_data[1]));
