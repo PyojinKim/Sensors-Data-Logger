@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+# Text files in Visualization
+Visualization/*.txt
+
 # Generated files
 bin/
 gen/
