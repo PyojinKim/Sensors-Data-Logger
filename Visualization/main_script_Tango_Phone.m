@@ -75,7 +75,7 @@ end
 
 % 2) plot Tango VIO motion estimation results
 figure;
-h_Tango = plot3(stateEsti_Tango(1,:),stateEsti_Tango(2,:),stateEsti_Tango(3,:),'m','LineWidth',2); hold on; grid on;
+h_Tango = plot3(stateEsti_Tango(1,:),stateEsti_Tango(2,:),stateEsti_Tango(3,:),'k','LineWidth',2); hold on; grid on;
 plot_inertial_frame(0.5); legend(h_Tango,{'Tango'}); axis equal; view(26, 73);
 xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10); hold off;
 
@@ -143,20 +143,17 @@ set(gcf,'Units','pixels','Position',[100 50 1800 900]);  % modify figure
 
 %% 3) RoNIN
 
+% parsing RoNIN text
+textFileDir = 'ronin.txt';
+textRoninData = importdata(textFileDir, delimiter, headerlinesIn);
+deviceRoninTime = textRoninData.data(:,1).';
+deviceRoninTrajectory = -textRoninData.data(:,[2:3]).';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+% plot RoNIN 2D trajectory
+figure;
+h_ronin = plot(deviceRoninTrajectory(1,:), deviceRoninTrajectory(2,:),'m','LineWidth',2); hold on; grid on; axis equal;
+plot_inertial_frame(0.5); legend([h_ronin],{'RoNIN'});
+xlabel('x [m]','fontsize',12); ylabel('y [m]','fontsize',12); hold off;
 
 
 
