@@ -14,25 +14,15 @@ headerlinesIn = 1;
 nanoSecondToSecond = 1000000000;
 
 
-%% pre-processing RoNIN, Tango, Google FLP on lat/lon
+%% pre-processing RoNIN, Google FLP on lat/lon
 
 % define start position by Google Map manually..
-startPositionDegree = [49.250942, -122.895072];
+startPositionDegree = [49.250913, -122.895135];
 [startPositionMeter, scale] = degreeToMeter(startPositionDegree);
-
-% parse Tango pose text file
-[TangoPoseDegree, TangoPoseTime] = importTangoTextFile('pose.txt', 0, startPositionMeter, scale);
-
-% plot horizontal position (latitude / longitude) trajectory on Google map
-figure;
-plot(TangoPoseDegree(2,:), TangoPoseDegree(1,:), 'k', 'LineWidth', 2); hold on;
-plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
-xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
-ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
 
 
 % parse RoNIN pose text file
-[RoninPoseDegree, RoninPoseTime] = importRoninTextFile('ronin.txt', 97, startPositionMeter, scale);
+[RoninPoseDegree, RoninPoseTime] = importRoninTextFile('ronin.txt', -9, startPositionMeter, scale);
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 figure;
@@ -54,29 +44,26 @@ xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
 ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
 
 
-% re-arrange RoNIN, Tango, FLP variables
+% re-arrange RoNIN, FLP variables
 rawDeviceDataset.RoninPoseTime = RoninPoseTime;
 rawDeviceDataset.RoninPoseDegree = RoninPoseDegree;
-rawDeviceDataset.TangoPoseTime = TangoPoseTime;
-rawDeviceDataset.TangoPoseDegree = TangoPoseDegree;
 rawDeviceDataset.FLPPoseTime = FLPPoseTime;
 rawDeviceDataset.FLPPoseDegree = FLPPoseDegree;
 rawDeviceDataset.FLPPoseMeter = FLPPoseMeter;
 rawDeviceDataset.FLPAccuracyMeter = FLPAccuracyMeter;
 
 
-% synchronize RoNIN, Tango, Google FLP
-[deviceDataset] = synchronizeRoNIN_Tango_FLP(rawDeviceDataset, 0.5);
+% synchronize RoNIN, Google FLP
+[deviceDataset] = synchronizeRoNIN_FLP(rawDeviceDataset, 0.5);
 syncTimestamp = deviceDataset.syncTimestamp;
 syncRoninPoseDegree = deviceDataset.syncRoninPoseDegree;
-syncTangoPoseDegree = deviceDataset.syncTangoPoseDegree;
 syncFLPPoseDegree = deviceDataset.syncFLPPoseDegree;
 syncFLPPoseMeter = deviceDataset.syncFLPPoseMeter;
 syncFLPAccuracyMeter = deviceDataset.syncFLPAccuracyMeter;
-numData = size(syncTangoPoseDegree,2);
+numData = size(syncRoninPoseDegree,2);
 
 
-%% RoNIN, Tango, Google FLP video clip
+%% RoNIN, Google FLP video clip
 
 % plot horizontal position (latitude / longitude) trajectory on Google map
 h = figure(10);
@@ -84,10 +71,7 @@ plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu
 xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
 ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
 
-%axis([-122.8968 -122.8944   49.2504   49.2519]) % 20191111_01_Lougheed_Mall_Tango
-%axis([-122.8969 -122.8943   49.2503   49.2518]) % 20191111_02_Lougheed_Mall_Tango
-%axis([-122.8967 -122.8944   49.2504   49.2518]) % 20191111_02_Lougheed_Mall_Galaxy_S9
-axis([-122.8966 -122.8945   49.2507   49.2519]) % 20191111_03_Lougheed_Mall_Tango
+axis([-122.8967 -122.8944   49.2504   49.2518]) % 20191111_02_Lougheed_Mall_Galaxy_S9
 %axis([-122.8968 -122.8943   49.2506   49.2521]) % 20191111_03_Lougheed_Mall_Galaxy_S9
 %axis([-122.8946 -122.8928   49.2518   49.2531]) % 20191117_01_Save_On_Foods
 %axis([127.0570  127.0617   37.5100   37.5135]) % 20191031_02_COEX_Seoul_Galaxy_S9
@@ -102,10 +86,6 @@ for k = 1:numData
     % plot RoNIN trajectory
     h_RoNIN_history = plot(syncRoninPoseDegree(2,1:k), syncRoninPoseDegree(1,1:k),'m','LineWidth',2);
     h_RoNIN_location = plot(syncRoninPoseDegree(2,k), syncRoninPoseDegree(1,k),'mo','LineWidth',5);
-    
-    % plot Tango trajectory
-    h_Tango_history = plot(syncTangoPoseDegree(2,1:k), syncTangoPoseDegree(1,1:k),'k','LineWidth',2);
-    h_Tango_location = plot(syncTangoPoseDegree(2,k), syncTangoPoseDegree(1,k),'ko','LineWidth',5);
     
     % plot Google FLP trajectory
     h_FLP_history = plot(syncFLPPoseDegree(2,1:k), syncFLPPoseDegree(1,1:k),'b*-','LineWidth',1);
@@ -149,9 +129,6 @@ for k = 1:numData
     
     delete(h_RoNIN_history)
     delete(h_RoNIN_location)
-    
-    delete(h_Tango_history)
-    delete(h_Tango_location)
     
     delete(h_FLP_history);
     delete(h_FLP_location);
