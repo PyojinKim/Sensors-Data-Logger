@@ -69,7 +69,7 @@ for k = 1:10:numPose
 end
 
 
-%% 2) gravity vector
+%% 2) parse gravity vector
 
 % parsing gravity text
 textGravityData = importdata('gravity.txt', delimiter, headerlinesIn);
@@ -124,7 +124,7 @@ poseTime = poseTime - startTime;
 gravityTime = gravityTime - startTime;
 endTime = max([poseTime(end), gravityTime(end)]);
 
-timeInterval = 0.05;
+timeInterval = 0.02;
 syncTimestamp = [0.001:timeInterval:endTime];
 numData = size(syncTimestamp,2);
 
@@ -157,14 +157,19 @@ end
 
 
 % play synchronized Tango / gravity vector
-figure(10);
+h = figure(10);
+set(gcf,'color','w'); axis equal; axis off;
+set(gcf,'Units','pixels','Position',[800 150 800 800]);
 for k = 1:numData
-    figure(10); cla;
+    
+    % initialize the figure
+    cla;
+    
     
     % current Tango and gravity vector
-    p_gb_Tango = syncTangoTrajectory(1:3,1:k);
     R_gb_Tango_current = syncTangoPose{k}(1:3,1:3);
     p_gb_Tango_current = syncTangoPose{k}(1:3,4);
+    p_gb_Tango = syncTangoTrajectory(1:3,1:k);
     
     gravity_current = R_gb_Tango_current * syncGravity(:,k);
     gravity_current = -gravity_current / norm(gravity_current);
@@ -172,7 +177,6 @@ for k = 1:numData
     
     
     % plot Tango 3D trajectory
-    plot_inertial_frame(1.0);
     plot3(p_gb_Tango(1,:), p_gb_Tango(2,:), p_gb_Tango(3,:), 'm', 'LineWidth', 2); hold on; grid on; axis equal;
     
     
@@ -181,10 +185,20 @@ for k = 1:numData
     
     
     % plot gravity vector
-    mArrow3(p_gb_Tango_current, gravity_current, 'color', 'red');
-    refresh; pause(0.01); k
+    mArrow3(p_gb_Tango_current, gravity_current, 'color', 'red', 'stemWidth', 0.01);
+    
+    
+    % figure options
+    plot_inertial_frame(0.5);                               % global (inertial) frame
+    view(-47,28);                                             % viewpoint angle
+    xlabel('X [m]'); ylabel('Y [m]'); zlabel('Z [m]');  % each axis label
+    pause(0.01); refresh(h); k
+    
+    
+    % save images
+    saveImg = getframe(h);
+    imwrite(saveImg.cdata , sprintf('figures/%06d.png',k));
 end
-
 
 
 
