@@ -27,7 +27,7 @@ public class WifiSession implements Runnable {
     // properties
     private final static String LOG_TAG = WifiSession.class.getName();
 
-    private final static int DEFAULT_INTERVAL = 30 * 1000; // milli second
+    private final static int DEFAULT_INTERVAL = 1 * 1000; // milli second
     private int mScanInterval = DEFAULT_INTERVAL;
 
     private MainActivity mContext;
@@ -46,23 +46,23 @@ public class WifiSession implements Runnable {
             if (!mIsRunning.get()) {
                 return;
             }
-            mWifiManager.startScan();
-            List<ScanResult> results = mWifiManager.getScanResults();
-            Log.i(LOG_TAG, "onReceive: Scan result received. Number of AP: " + String.valueOf(results.size()));
 
             // save the wifi scan results to text file
-            if (mIsWritingFile.get()) {
+            boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
+            if ((success) && (mIsWritingFile.get())) {
                 try {
+                    List<ScanResult> results = mWifiManager.getScanResults();
                     mFileStreamer.addWifiRecord(results);
+
+                    // display Wifi scan results in main class
+                    float currentScanInterval = ((float) mScanInterval / 1000.0f);
+                    mContext.displayWifiScanMeasurements(results.size(), currentScanInterval, results.get(0).SSID, results.get(0).level);
+
                 } catch (IOException | KeyException e) {
                     Log.e(LOG_TAG, "onReceive: Cannot add the scan results to file");
                     e.printStackTrace();
                 }
             }
-
-            // display Wifi scan results in main class
-            float currentScanInterval = ((float) mScanInterval / 1000.0f);
-            mContext.displayWifiScanMeasurements(results.size(), currentScanInterval, results.get(0).SSID, results.get(0).level);
         }
     };
 
@@ -90,7 +90,9 @@ public class WifiSession implements Runnable {
 
         // initialize text file stream
         mIsRunning.set(true);
-        mContext.registerReceiver(mScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mContext.registerReceiver(mScanReceiver, intentFilter);
         if (streamFolder != null) {
             try {
                 mFileStreamer = new WifiResultStreamer(mContext, streamFolder);
@@ -173,11 +175,21 @@ public class WifiSession implements Runnable {
                 stringBuilder.append(results.size());
                 stringBuilder.append('\n');
                 for (ScanResult eachResult : results) {
-                    stringBuilder.append(eachResult.timestamp);
+                    stringBuilder.append(eachResult.timestamp * 1000); // micro sec to nano sec
                     stringBuilder.append('\t');
                     stringBuilder.append(eachResult.BSSID);
                     stringBuilder.append('\t');
                     stringBuilder.append(String.valueOf(eachResult.level));
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.frequency);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.centerFreq0);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.centerFreq1);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.channelWidth);
+                    stringBuilder.append('\t');
+                    stringBuilder.append(eachResult.SSID);
                     stringBuilder.append('\n');
                 }
                 mWriter.write(stringBuilder.toString());
@@ -189,7 +201,6 @@ public class WifiSession implements Runnable {
 
             // execute the block with only one thread
             synchronized (this) {
-                mWriter.write("-1");
                 mWriter.flush();
                 mWriter.close();
             }
