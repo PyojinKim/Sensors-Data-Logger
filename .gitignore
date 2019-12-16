@@ -10,6 +10,9 @@
 
 # Text files in Visualization
 Visualization/*.txt
+WiFi_SfM_core/*.txt
+WiFi_SfM_core/*.mat
+WiFi_SfM_core/*.avi
 
 # Generated files
 bin/
