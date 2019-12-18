@@ -89,13 +89,6 @@ for k = 1:numData
 end
 
 
-
-
-
-
-
-
-
 %%
 
 
@@ -105,13 +98,11 @@ h_Tango = plot3(syncTangoTrajectory(1,:),syncTangoTrajectory(2,:),syncTangoTraje
 plot_inertial_frame(0.5); axis equal; view(26, 73);
 xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10);
 
-m = syncWiFiRSSI_index(25);
+m = syncWiFiRSSI_index(20);
 plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
 
-m = syncWiFiRSSI_index(45);
+m = syncWiFiRSSI_index(61);
 plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'bo','LineWidth',5);
-
-
 
 for m = syncWiFiRSSI_index
     
@@ -121,13 +112,6 @@ for m = syncWiFiRSSI_index
 end
 
 
-hold off;
-
-% figure options
-f = FigureRotator(gca());
-
-
-
 close all;
 bar(wifiScanRSSI(45).RSSI)
 xlabel('unique AP ID','fontsize',10); ylabel('RSSI (dBm)','fontsize',10);
@@ -135,6 +119,17 @@ xlabel('unique AP ID','fontsize',10); ylabel('RSSI (dBm)','fontsize',10);
 
 
 view(154,39)
+
+
+%% trajectory distance error computation
+
+
+norm(syncTangoTrajectory(1:3,syncWiFiRSSI_index(20)) - syncTangoTrajectory(1:3,syncWiFiRSSI_index(61)))
+
+
+
+
+
 
 
 
