@@ -20,10 +20,18 @@ nanoSecondToSecond = 1000000000;
 
 % vectorize WiFi RSSI for each WiFi scan
 [wifiScanRSSI,~] = vectorizeWiFiRSSI(wifiScanResult);
+[wifiScanRSSI] = filterWiFiRSSI(wifiScanRSSI, -75);
 
 
 % parse pose.txt file (from ASUS Tango)
 [TangoPoseResult] = parseTangoPoseTextFile('pose.txt');
+
+
+
+
+%%
+
+
 
 
 
@@ -101,7 +109,7 @@ m = syncWiFiRSSI_index(25);
 plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
 
 m = syncWiFiRSSI_index(45);
-plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
+plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'bo','LineWidth',5);
 
 
 
@@ -126,7 +134,7 @@ xlabel('unique AP ID','fontsize',10); ylabel('RSSI (dBm)','fontsize',10);
 
 
 
-
+view(154,39)
 
 
 
