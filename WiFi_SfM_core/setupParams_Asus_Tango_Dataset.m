@@ -2,6 +2,13 @@
 
 switch( expCase )
     
+    case 1
+        % 20191213_01_SFU_TASC1 (reference inertial frame)
+        yaw = 0.0;
+        tx = 0.0;
+        ty = 0.0;
+        tz = 0;
+        
     case 2
         % 20191218_01_SFU_TASC1
         yaw = 183.5;

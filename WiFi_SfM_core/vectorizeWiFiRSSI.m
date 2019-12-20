@@ -1,26 +1,8 @@
-function [wifiScanRSSI, uniqueWiFiAPsBSSID] = vectorizeWiFiRSSI(wifiScanResult)
-
-% extract all recorded WiFi BSSID
-tempWiFiAPsBSSID = [];
-numWiFiScan = size(wifiScanResult,2);
-for k = 1:numWiFiScan
-    
-    % current number of APs
-    numWiFiAPs = wifiScanResult(k).numberOfAPs;
-    for m = 1:numWiFiAPs
-        
-        % save current WiFi BSSID
-        currentBSSID = convertCharsToStrings(wifiScanResult(k).wifiAPsResult(m).BSSID);
-        tempWiFiAPsBSSID = [tempWiFiAPsBSSID; currentBSSID];
-    end
-end
-
-% find unique WiFi BSSID
-uniqueWiFiAPsBSSID = unique(tempWiFiAPsBSSID);
-numUniqueBSSID = size(uniqueWiFiAPsBSSID,1);
-
+function [wifiScanRSSI] = vectorizeWiFiRSSI(wifiScanResult, uniqueWiFiAPsBSSID)
 
 % construct WiFi RSSI vector
+numWiFiScan = size(wifiScanResult,2);
+numUniqueBSSID = size(uniqueWiFiAPsBSSID,1);
 wifiScanRSSI = struct('timestamp', cell(1,numWiFiScan), 'RSSI', cell(1,numWiFiScan));
 for k = 1:numWiFiScan
     
