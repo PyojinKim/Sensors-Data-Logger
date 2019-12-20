@@ -39,3 +39,28 @@ plot(distanceResult);
 xlabel('WiFi Scan Location Index'); ylabel('Distance Metric (L1)');
 
 [~,index] = min(distanceResult);
+
+
+
+%%
+
+
+% 1) plot Tango VIO motion estimation results
+figure;
+h_Tango = plot3(stateEsti_Tango(1,:),stateEsti_Tango(2,:),stateEsti_Tango(3,:),'k','LineWidth',2); hold on; grid on;
+plot_inertial_frame(0.5); legend(h_Tango,{'Tango'}); axis equal; view(26, 73);
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10); hold off;
+
+% figure options
+f = FigureRotator(gca());
+
+
+
+
+
+
+
+
+
+
+
