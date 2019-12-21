@@ -53,8 +53,8 @@ datasetWiFiScanResult = cell(1,numDatasetList);
 for k = 1:numDatasetList
     
     % parse wifi.txt file
-    currentWiFiTextFile = [datasetPath '/' datasetList(k).name '/wifi.txt'];
-    wifiScanResult = parseWiFiTextFile(currentWiFiTextFile);
+    wifiTextFile = [datasetPath '/' datasetList(k).name '/wifi.txt'];
+    wifiScanResult = parseWiFiTextFile(wifiTextFile);
     
     % save WiFi scan result
     datasetWiFiScanResult{k} = wifiScanResult;

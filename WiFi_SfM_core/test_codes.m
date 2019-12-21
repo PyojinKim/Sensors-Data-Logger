@@ -237,5 +237,40 @@ end
 
 
 
+%%
+
+
+% 2) plot Tango VIO motion estimation results
+figure;
+h_Tango = plot3(syncTangoTrajectory(1,:),syncTangoTrajectory(2,:),syncTangoTrajectory(3,:),'k','LineWidth',2); hold on; grid on;
+plot_inertial_frame(0.5); axis equal; view(26, 73);
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10);
+
+m = syncWiFiRSSI_index(20);
+plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
+
+m = syncWiFiRSSI_index(61);
+plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'bo','LineWidth',5);
+
+for m = syncWiFiRSSI_index
+    
+    plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
+    m
+    
+end
+
+
+
+
+
+
+view(154,39)
+
+
+
+
+
+
+
 
 
