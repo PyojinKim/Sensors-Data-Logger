@@ -259,16 +259,27 @@ for m = syncWiFiRSSI_index
     
 end
 
-
-
-
-
-
 view(154,39)
 
+%%
 
 
+load('test_matlab.csv');
 
+% colorize by Z coordinate
+X = test_matlab(:,1);
+Y = test_matlab(:,2);
+Z = test_matlab(:,3);
+C = Z;
+
+scatter3(X(:),Y(:),Z(:),5,C(:),'.');
+
+colormap(jet);
+colorbar;
+
+xlabel('X Coordinate');
+ylabel('Y Coordinate');
+zlabel('Height above sea level');
 
 
 

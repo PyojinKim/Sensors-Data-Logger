@@ -135,47 +135,37 @@ queryIndex = 20;
 queryRSSI = datasetWiFiScanResult{1}(queryIndex).RSSI;
 
 
-% compute RSSI distance metric
-numWiFiScan = size(wifiFingerprintDatabase,2);
-distanceResult = 50 * ones(1,numWiFiScan);
-numUniqueAPs = size(queryRSSI,1);
-for k = 1:numWiFiScan
-    
-    %
-    databaseRSSI = wifiFingerprintDatabase(k).RSSI;
-    distanceSum = 0;
-    distanceCount = 0;
-    for m = 1:numUniqueAPs
-        
-        % compute the difference
-        p = queryRSSI(m);
-        q = databaseRSSI(m);
-        if ((p ~= -200) && (q ~= -200))
-            %distanceSum = distanceSum + ((p - q)^2);    % L2 distance
-            distanceSum = distanceSum + abs(p - q);        % L1 distance
-            distanceCount = distanceCount + 1;
-        end
-    end
-    
-    % save the average distance metric
-    if ((distanceCount ~= 0) && (distanceCount > 5))
-        %distanceResult(k) = sqrt(distanceSum / distanceCount);   % L2 distance
-        distanceResult(k) = distanceSum / distanceCount;             % L1 distance
-    end
-end
-%distanceResult(queryIndex) = 50;
-
+%%
 
 figure;
 plot(distanceResult);
 xlabel('WiFi Scan Location Index'); ylabel('Distance Metric (L1)');
 
-[~,index] = min(distanceResult);
+
+%% heat map plot
 
 
+norm(datasetWiFiScanResult{1}(queryIndex).location - wifiFingerprintDatabase(368).location)
 
 
+% plot WiFi scan location with distance (reward function) heat map
+labeledWiFiScanLocation = [wifiFingerprintDatabase(:).location];
+X = labeledWiFiScanLocation(1,:);
+Y = labeledWiFiScanLocation(2,:);
+Z = labeledWiFiScanLocation(3,:);
+C = distanceResult;
 
+figure;
+scatter3(X(:),Y(:),Z(:),100,C(:),'.');
+
+colormap(jet);
+colorbar;
+
+plot_inertial_frame(0.5); axis equal; view(154,39)
+xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
+
+% figure options
+f = FigureRotator(gca());
 
 
 

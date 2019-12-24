@@ -14,27 +14,38 @@ poseReference = [TangoPoseReference(:).stateEsti_Tango];
 poseTest = [TangoPoseTest(:).stateEsti_Tango];
 
 
-% find yaw / translation x-y-z
-yaw = 183.5;
-tx = -0.0;
-ty = 1.5;
+% manual coordinate alignment (global inertial frame) for pose reference
+yaw = -3.5;
+tx = 0.0;
+ty = 0.0;
 tz = 0;
 
 
-% manual coordinate alignment (global inertial frame)
+% transform Tango VIO pose reference
 R = angle2rotmtx([0;0;(deg2rad(yaw))]);
 t = [tx; ty; tz];
+referenceTransformed = R * poseReference(1:3,:);
+referenceTransformed = referenceTransformed + t;
 
 
-% transform Tango VIO trajectory
-poseTestTransformed = R * poseTest(1:3,:);
-poseTestTransformed = poseTestTransformed + t;
+% manual coordinate alignment (global inertial frame) for pose test
+yaw = 180.0;
+tx = -0.2;
+ty = 1.1;
+tz = 0;
+
+
+% transform Tango VIO pose test
+R = angle2rotmtx([0;0;(deg2rad(yaw))]);
+t = [tx; ty; tz];
+testTransformed = R * poseTest(1:3,:);
+testTransformed = testTransformed + t;
 
 
 % plot Tango VIO motion estimation results
 figure;
-plot3(poseReference(1,:),poseReference(2,:),poseReference(3,:),'k','LineWidth',2); hold on; grid on;
-plot3(poseTestTransformed(1,:),poseTestTransformed(2,:),poseTestTransformed(3,:),'r','LineWidth',2);
+plot3(referenceTransformed(1,:),referenceTransformed(2,:),referenceTransformed(3,:),'k','LineWidth',2); hold on; grid on;
+plot3(testTransformed(1,:),testTransformed(2,:),testTransformed(3,:),'r','LineWidth',2);
 plot_inertial_frame(0.5); axis equal; view(0, 90);
 xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10); hold off;
 
