@@ -125,27 +125,43 @@ xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fo
 % construct WiFi fingerprint database
 wifiFingerprintDatabase = [];
 numDataset = size(datasetWiFiScanResult,2);
-for k = 1:numDataset
+for k = 1:(numDataset - 1)
     wifiFingerprintDatabase = [wifiFingerprintDatabase, datasetWiFiScanResult{k}];
 end
 
 
-% choose query RSSI vector
-queryIndex = 20;
-queryRSSI = datasetWiFiScanResult{1}(queryIndex).RSSI;
+% choose test WiFi scan dataset
+testWiFiScanResult = datasetWiFiScanResult{numDataset};
+numTestWiFiScan = size(testWiFiScanResult,2);
+errorLocation = zeros(1,numTestWiFiScan);
+for queryIndex = 1:numTestWiFiScan
+    
+    %
+    queryRSSI = testWiFiScanResult(queryIndex).RSSI;
+    queryTrueLocation = testWiFiScanResult(queryIndex).location;
+    
+    %
+    rewardResult = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
+    [~,index] = max(rewardResult);
+    errorLocation(queryIndex) = norm(queryTrueLocation - wifiFingerprintDatabase(index).location);
+end
 
 
-%%
 
 figure;
-plot(distanceResult);
-xlabel('WiFi Scan Location Index'); ylabel('Distance Metric (L1)');
+plot(errorLocation); grid on; axis tight;
+xlabel('WiFi Scan Location Index'); ylabel('Error Distance (m)');
+
+
+figure;
+plot(rewardResult);
+xlabel('WiFi Scan Location Index'); ylabel('Reward Metric');
 
 
 %% heat map plot
 
 
-norm(datasetWiFiScanResult{1}(queryIndex).location - wifiFingerprintDatabase(368).location)
+
 
 
 % plot WiFi scan location with distance (reward function) heat map
@@ -153,10 +169,11 @@ labeledWiFiScanLocation = [wifiFingerprintDatabase(:).location];
 X = labeledWiFiScanLocation(1,:);
 Y = labeledWiFiScanLocation(2,:);
 Z = labeledWiFiScanLocation(3,:);
-C = distanceResult;
+C = rewardResult;
 
 figure;
-scatter3(X(:),Y(:),Z(:),100,C(:),'.');
+plot3(queryTrueLocation(1),queryTrueLocation(2),queryTrueLocation(3),'mo','LineWidth',2); hold on; grid on;
+scatter3(X(:),Y(:),Z(:),150,C(:),'.');
 
 colormap(jet);
 colorbar;
