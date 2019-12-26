@@ -53,7 +53,7 @@ xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fo
 %% 2) build unique BSSID map for RSSI vectorization
 
 % load dataset lists (Android Sensors-Data-Logger App from ASUS Tango)
-datasetPath = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango';
+datasetPath = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000';
 datasetList = dir(datasetPath);
 datasetList(1:2) = [];
 
