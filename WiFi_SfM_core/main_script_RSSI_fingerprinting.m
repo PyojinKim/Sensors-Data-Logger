@@ -161,8 +161,8 @@ maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).location];
 % plot WiFi scan location with distance (reward function) heat map
 figure;
 scatter3(databaseWiFiScanLocation(1,:),databaseWiFiScanLocation(2,:),databaseWiFiScanLocation(3,:),100,rewardResult,'.'); hold on; grid on;
-plot3(queryTruePosition(1),queryTruePosition(2),queryTruePosition(3) + 0.5,'kd','LineWidth',4);
-plot3(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),maxRewardWiFiScanLocation(3,:)+ 0.5,'md','LineWidth',4);
+plot3(queryTruePosition(1),queryTruePosition(2),queryTruePosition(3)+0.5,'kd','LineWidth',3);
+plot3(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),maxRewardWiFiScanLocation(3,:)+0.5,'md','LineWidth',3);
 colormap(jet); colorbar;
 plot_inertial_frame(0.5); axis equal; view(154,39);
 xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
