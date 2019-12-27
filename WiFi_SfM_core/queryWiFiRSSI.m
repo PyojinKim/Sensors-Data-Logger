@@ -1,4 +1,4 @@
-function [rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase)
+function [queryPosition, maxRewardIndex, rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase)
 
 % compare query RSSI to WiFi RSSI database
 numLabeledWiFiScan = size(wifiFingerprintDatabase,2);
@@ -9,6 +9,13 @@ for k = 1:numLabeledWiFiScan
     databaseRSSI = wifiFingerprintDatabase(k).RSSI;
     rewardResult(k) = computeRewardMetric(queryRSSI, databaseRSSI);
 end
+
+
+% K-nearest neighbour (kNN) based WiFi positioning
+numNeighbors = 4;
+[~,maxRewardIndex] = sort(rewardResult, 'descend');
+maxRewardIndex = maxRewardIndex(1:numNeighbors);
+queryPosition = mean([wifiFingerprintDatabase(maxRewardIndex).location],2);
 
 
 end

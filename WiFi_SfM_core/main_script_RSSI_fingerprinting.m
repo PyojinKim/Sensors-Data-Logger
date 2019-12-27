@@ -130,22 +130,20 @@ for k = 1:(numDataset - 1)
 end
 
 
-% choose test WiFi scan dataset
+% choose test WiFi scan dataset for WiFi localization
 testWiFiScanResult = datasetWiFiScanResult{numDataset};
 numTestWiFiScan = size(testWiFiScanResult,2);
 errorLocation = zeros(1,numTestWiFiScan);
 for queryIndex = 1:numTestWiFiScan
     
-    %
+    % current RSSI vector and true position from Tango VIO
     queryRSSI = testWiFiScanResult(queryIndex).RSSI;
-    queryTrueLocation = testWiFiScanResult(queryIndex).location;
+    queryTruePosition = testWiFiScanResult(queryIndex).location;
     
-    %
-    rewardResult = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
-    [~,index] = max(rewardResult);
-    errorLocation(queryIndex) = norm(queryTrueLocation - wifiFingerprintDatabase(index).location);
+    % query RSSI vector against WiFi fingerprint database
+    [queryPosition, maxRewardIndex, rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
+    errorLocation(queryIndex) = norm(queryPosition - queryTruePosition);
 end
-
 
 
 figure;
@@ -153,41 +151,24 @@ plot(errorLocation); grid on; axis tight;
 xlabel('WiFi Scan Location Index'); ylabel('Error Distance (m)');
 
 
-figure;
-plot(rewardResult);
-xlabel('WiFi Scan Location Index'); ylabel('Reward Metric');
-
-
 %% heat map plot
 
-
-
+% re-arrange WiFi scan location
+databaseWiFiScanLocation = [wifiFingerprintDatabase(:).location];
+maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).location];
 
 
 % plot WiFi scan location with distance (reward function) heat map
-labeledWiFiScanLocation = [wifiFingerprintDatabase(:).location];
-X = labeledWiFiScanLocation(1,:);
-Y = labeledWiFiScanLocation(2,:);
-Z = labeledWiFiScanLocation(3,:);
-C = rewardResult;
-
 figure;
-plot3(queryTrueLocation(1),queryTrueLocation(2),queryTrueLocation(3),'mo','LineWidth',2); hold on; grid on;
-scatter3(X(:),Y(:),Z(:),150,C(:),'.');
-
-colormap(jet);
-colorbar;
-
-plot_inertial_frame(0.5); axis equal; view(154,39)
+scatter3(databaseWiFiScanLocation(1,:),databaseWiFiScanLocation(2,:),databaseWiFiScanLocation(3,:),100,rewardResult,'.'); hold on; grid on;
+plot3(queryTruePosition(1),queryTruePosition(2),queryTruePosition(3) + 0.5,'kd','LineWidth',4);
+plot3(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),maxRewardWiFiScanLocation(3,:)+ 0.5,'md','LineWidth',4);
+colormap(jet); colorbar;
+plot_inertial_frame(0.5); axis equal; view(154,39);
 xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
 
 % figure options
 f = FigureRotator(gca());
-
-
-
-
-
 
 
 
