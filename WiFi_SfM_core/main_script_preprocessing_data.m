@@ -53,7 +53,7 @@ xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fo
 %% 2) build unique BSSID map for RSSI vectorization
 
 % load dataset lists (Android Sensors-Data-Logger App from ASUS Tango)
-expCase = 4;
+expCase = 1;
 setupParams_WiFi_SfM;
 datasetList = dir(datasetPath);
 datasetList(1:2) = [];
@@ -100,7 +100,7 @@ numUniqueBSSID = size(uniqueWiFiAPsBSSID,1);
 
 
 % save unique WiFi BSSID list (WiFi BSSID Map)
-save('uniqueWiFiAPsBSSID.mat','uniqueWiFiAPsBSSID');
+save([datasetPath '/uniqueWiFiAPsBSSID.mat'],'uniqueWiFiAPsBSSID');
 
 
 

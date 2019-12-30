@@ -8,9 +8,9 @@ dbstop if error;
 %% 1) build consistent Tango VIO pose in global inertial frame
 
 % load dataset lists (Android Sensors-Data-Logger App from ASUS Tango)
-datasetPath = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000';
-datasetList = dir(datasetPath);
-datasetList(1:2) = [];
+expCase = 1;
+setupParams_WiFi_SfM;
+datasetList = loadDatasetList(datasetPath);
 
 
 % parse all pose.txt files
@@ -42,12 +42,6 @@ end
 
 %% 2) build consistent WiFi RSSI vector
 
-% load dataset lists (Android Sensors-Data-Logger App from ASUS Tango)
-datasetPath = 'G:/Smartphone_Dataset/4_WiFi_SfM/Asus_Tango/SFU_TASC1_8000';
-datasetList = dir(datasetPath);
-datasetList(1:2) = [];
-
-
 % parse all wifi.txt files
 numDatasetList = size(datasetList,1);
 datasetWiFiScanResult = cell(1,numDatasetList);
@@ -63,7 +57,7 @@ end
 
 
 % load unique WiFI RSSID Map
-load('uniqueWiFiAPsBSSID_SFU_TASC1_8000.mat');
+load([datasetPath '/uniqueWiFiAPsBSSID.mat']);
 for k = 1:numDatasetList
     
     % current WiFi scan result
