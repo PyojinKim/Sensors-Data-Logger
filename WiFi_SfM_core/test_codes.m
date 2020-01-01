@@ -1,4 +1,21 @@
 
+
+
+addpath('devkit_KITTI_GPS');
+
+
+GoogleFLPResult = parseGoogleFLPTextFile('FLP.txt');
+
+
+
+temp = [GoogleFLPResult(:).locationMeter];
+
+
+figure;
+plot(temp(1,:),temp(2,:),'k*-'); grid on;
+
+
+
 %% 1) plot all Tango VIO pose in global inertial frame
 
 % initialize various colors for figures
