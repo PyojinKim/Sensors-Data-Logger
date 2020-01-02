@@ -4,6 +4,8 @@ clear variables; %clear classes;
 rand('state',0); % rand('state',sum(100*clock));
 dbstop if error;
 
+addpath('devkit_KITTI_GPS');
+
 
 %% 1) build consistent Tango VIO pose in global inertial frame
 
@@ -65,7 +67,7 @@ for k = 1:numDatasetList
     
     % vectorize WiFi RSSI for each WiFi scan
     wifiScanRSSI = vectorizeWiFiRSSI(wifiScanResult, uniqueWiFiAPsBSSID);
-    wifiScanRSSI = filterWiFiRSSI(wifiScanRSSI, -80);
+    wifiScanRSSI = filterWiFiRSSI(wifiScanRSSI, -100);
     
     % save WiFi RSSI vector
     datasetWiFiScanResult{k} = wifiScanRSSI;
@@ -127,7 +129,6 @@ end
 % choose test WiFi scan dataset for WiFi localization
 testWiFiScanResult = datasetWiFiScanResult{numDataset};
 numTestWiFiScan = size(testWiFiScanResult,2);
-errorLocation = zeros(1,numTestWiFiScan);
 for queryIndex = 1:numTestWiFiScan
     
     % current RSSI vector and true position from Tango VIO
@@ -136,18 +137,44 @@ for queryIndex = 1:numTestWiFiScan
     
     % query RSSI vector against WiFi fingerprint database
     [queryPosition, maxRewardIndex, rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
-    errorLocation(queryIndex) = norm(queryPosition - queryTruePosition);
+    
+    % save the query result
+    testWiFiScanResult(queryIndex).queryPosition = queryPosition;
+    testWiFiScanResult(queryIndex).maxRewardIndex = maxRewardIndex;
+    testWiFiScanResult(queryIndex).rewardResult = rewardResult;
+    testWiFiScanResult(queryIndex).errorLocation = norm(queryPosition - queryTruePosition);
 end
 
 
+% plot query (estimated) location error
 figure;
-plot(errorLocation); grid on; axis tight;
+plot([testWiFiScanResult(:).errorLocation]); grid on; axis tight;
 xlabel('WiFi Scan Location Index'); ylabel('Error Distance (m)');
+
+
+% plot 3D arrow location error
+trueTrajectory = [testWiFiScanResult(:).location];
+queryTrajectory = [testWiFiScanResult(:).queryPosition];
+figure;
+h_true = plot3(trueTrajectory(1,:),trueTrajectory(2,:),trueTrajectory(3,:),'k*-','LineWidth',1.0); hold on; grid on;
+h_WiFi = plot3(queryTrajectory(1,:),queryTrajectory(2,:),queryTrajectory(3,:),'m*-','LineWidth',1.0);
+for k = 1:numTestWiFiScan
+    trueLocation = testWiFiScanResult(k).location;
+    queryLocation = testWiFiScanResult(k).queryPosition;
+    mArrow3(trueLocation, queryLocation, 'color', 'red', 'stemWidth', 0.04);
+end
+plot_inertial_frame(0.5); axis equal; view(154,39);
+xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
 
 
 %% heat map plot
 
 % re-arrange WiFi scan location
+queryIndex = 25;
+rewardResult = testWiFiScanResult(queryIndex).rewardResult;
+maxRewardIndex = testWiFiScanResult(queryIndex).maxRewardIndex;
+trueLocation = testWiFiScanResult(queryIndex).location;
+
 databaseWiFiScanLocation = [wifiFingerprintDatabase(:).location];
 maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).location];
 
@@ -155,7 +182,7 @@ maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).location];
 % plot WiFi scan location with distance (reward function) heat map
 figure;
 scatter3(databaseWiFiScanLocation(1,:),databaseWiFiScanLocation(2,:),databaseWiFiScanLocation(3,:),100,rewardResult,'.'); hold on; grid on;
-plot3(queryTruePosition(1),queryTruePosition(2),queryTruePosition(3)+0.5,'kd','LineWidth',3);
+plot3(trueLocation(1),trueLocation(2),trueLocation(3)+0.5,'kd','LineWidth',3);
 plot3(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),maxRewardWiFiScanLocation(3,:)+0.5,'md','LineWidth',3);
 colormap(jet); colorbar;
 plot_inertial_frame(0.5); axis equal; view(154,39);
@@ -163,6 +190,15 @@ xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
 
 % figure options
 f = FigureRotator(gca());
+
+
+% plot reward metric result
+figure;
+plot(rewardResult); grid on; axis tight;
+xlabel('WiFi Scan Location Index in Fingerprint Database'); ylabel('Reward Metric');
+
+
+
 
 
 
