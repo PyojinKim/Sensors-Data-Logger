@@ -1,5 +1,5 @@
 
-
+%%
 
 addpath('devkit_KITTI_GPS');
 
@@ -23,7 +23,113 @@ plot(temp(1,:),temp(2,:),'k*-'); grid on;
 
 
 
+%% 1) build consistent Tango VIO pose in global inertial frame
 
+% load dataset lists (Android Sensors-Data-Logger App from ASUS Tango)
+expCase = 1;
+setupParams_WiFi_SfM;
+datasetList = loadDatasetList(datasetPath);
+
+
+% parse all pose.txt files
+numDatasetList = size(datasetList,1);
+datasetTangoPoseResult = cell(1,numDatasetList);
+for k = 1:numDatasetList
+    
+    % parse pose.txt file
+    poseTextFile = [datasetPath '/' datasetList(k).name '/pose.txt'];
+    TangoPoseResult = parseTangoPoseTextFile(poseTextFile);
+    
+    % read manual alignment result
+    expCase = k;
+    manual_alignment_Asus_Tango_SFU_TASC1_8000;
+    R = angle2rotmtx([0;0;(deg2rad(yaw))]);
+    t = [tx; ty; tz];
+    
+    % transform to global inertial frame
+    numPose = size(TangoPoseResult,2);
+    for m = 1:numPose
+        transformedTangoPose = (R * TangoPoseResult(m).stateEsti_Tango(1:3) + t);
+        TangoPoseResult(m).stateEsti_Tango = transformedTangoPose;
+    end
+    
+    % save Tango pose VIO result
+    datasetTangoPoseResult{k} = TangoPoseResult;
+end
+
+
+%% 2) build consistent WiFi RSSI vector
+
+% parse all wifi.txt files
+numDatasetList = size(datasetList,1);
+datasetWiFiScanResult = cell(1,numDatasetList);
+for k = 1:numDatasetList
+    
+    % parse wifi.txt file
+    wifiTextFile = [datasetPath '/' datasetList(k).name '/wifi.txt'];
+    wifiScanResult = parseWiFiTextFile(wifiTextFile);
+    
+    % save WiFi scan result
+    datasetWiFiScanResult{k} = wifiScanResult;
+end
+
+
+% load unique WiFI RSSID Map
+load([datasetPath '/uniqueWiFiAPsBSSID.mat']);
+for k = 1:numDatasetList
+    
+    % current WiFi scan result
+    wifiScanResult = datasetWiFiScanResult{k};
+    
+    % vectorize WiFi RSSI for each WiFi scan
+    wifiScanRSSI = vectorizeWiFiRSSI(wifiScanResult, uniqueWiFiAPsBSSID);
+    wifiScanRSSI = filterWiFiRSSI(wifiScanRSSI, -100);
+    
+    % save WiFi RSSI vector
+    datasetWiFiScanResult{k} = wifiScanRSSI;
+end
+
+
+%% 3) label consistent WiFi RSSI vector with Tango VIO location
+
+% label all WiFi RSSI vector in global inertial frame
+for k = 1:numDatasetList
+    
+    % current Tango VIO pose / WiFi RSSI vector
+    TangoPoseResult = datasetTangoPoseResult{k};
+    wifiScanRSSI = datasetWiFiScanResult{k};
+    
+    % label WiFi RSSI vector
+    numWiFiScan = size(wifiScanRSSI,2);
+    for m = 1:numWiFiScan
+        
+        % find the closest Tango pose timestamp
+        [timeDifference, indexTango] = min(abs(wifiScanRSSI(m).timestamp - [TangoPoseResult.timestamp]));
+        if (timeDifference < 5.0)
+            
+            % save corresponding Tango pose location
+            wifiScanRSSI(m).location = TangoPoseResult(indexTango).stateEsti_Tango;
+            wifiScanRSSI(m).dataset = datasetList(k).name;
+        else
+            error('Fail to find the closest Tango pose timestamp.... at %d', m);
+        end
+    end
+    
+    % save labeled WiFi RSSI vector
+    datasetWiFiScanResult{k} = wifiScanRSSI;
+end
+
+
+% plot Tango VIO with WiFi RSSI scan location together
+k = 1;
+TangoPose = [datasetTangoPoseResult{k}.stateEsti_Tango];
+wifiScanLocation = [datasetWiFiScanResult{k}.location];
+
+figure;
+plot3(TangoPose(1,:),TangoPose(2,:),TangoPose(3,:),'k','LineWidth',2); hold on; grid on;
+plot3(wifiScanLocation(1,:),wifiScanLocation(2,:),wifiScanLocation(3,:),'ro','LineWidth',2);
+plot_inertial_frame(0.5); axis equal; view(154,39)
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10); hold off;
 
 
 %% 1) plot all Tango VIO pose in global inertial frame
@@ -72,13 +178,6 @@ xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fo
 
 % figure options
 f = FigureRotator(gca());
-
-
-%%
-
-close all;
-bar(wifiScanRSSI(45).RSSI)
-xlabel('unique AP ID','fontsize',10); ylabel('RSSI (dBm)','fontsize',10);
 
 
 %%
@@ -132,32 +231,6 @@ for k = 1:numData
     fprintf('Current Status: %d / %d \n', k, numData);
 end
 
-
-
-
-%%
-
-
-% 2) plot Tango VIO motion estimation results
-figure;
-h_Tango = plot3(syncTangoTrajectory(1,:),syncTangoTrajectory(2,:),syncTangoTrajectory(3,:),'k','LineWidth',2); hold on; grid on;
-plot_inertial_frame(0.5); axis equal; view(26, 73);
-xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10);
-
-m = syncWiFiRSSI_index(20);
-plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
-
-m = syncWiFiRSSI_index(61);
-plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'bo','LineWidth',5);
-
-for m = syncWiFiRSSI_index
-    
-    plot3(syncTangoTrajectory(1,m),syncTangoTrajectory(2,m),syncTangoTrajectory(3,m),'ro','LineWidth',5);
-    m
-    
-end
-
-view(154,39)
 
 %%
 
