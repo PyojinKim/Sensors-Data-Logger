@@ -1,25 +1,15 @@
 
-%%
-
-addpath('devkit_KITTI_GPS');
-
-
-GoogleFLPResult = parseGoogleFLPTextFile('FLP.txt');
-
-
-
-temp = [GoogleFLPResult(:).locationMeter];
 
 
 
 
-TangoPose = [datasetTangoPoseResult{10}.stateEsti_Tango];
 
 
 
 
-figure;
-plot(temp(1,:),temp(2,:),'k*-'); grid on;
+
+
+
 
 
 

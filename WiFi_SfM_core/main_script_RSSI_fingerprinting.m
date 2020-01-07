@@ -105,10 +105,10 @@ xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
 queryIndex = 25;
 rewardResult = testWiFiScanResult(queryIndex).rewardResult;
 maxRewardIndex = testWiFiScanResult(queryIndex).maxRewardIndex;
-trueLocation = testWiFiScanResult(queryIndex).location;
+trueLocation = testWiFiScanResult(queryIndex).trueLocation;
 
-databaseWiFiScanLocation = [wifiFingerprintDatabase(:).location];
-maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).location];
+databaseWiFiScanLocation = [wifiFingerprintDatabase(:).trueLocation];
+maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).trueLocation];
 
 
 % plot WiFi scan location with distance (reward function) heat map
@@ -128,6 +128,68 @@ f = FigureRotator(gca());
 figure;
 plot(rewardResult); grid on; axis tight;
 xlabel('WiFi Scan Location Index in Fingerprint Database'); ylabel('Reward Metric');
+
+
+%% 3) manual Google FLP and Tango VIO alignment
+
+% read manual alignment result
+GoogleFLPIndex = 10;
+expCase = GoogleFLPIndex;
+manual_alignment_Asus_Tango_SFU_TASC1_8000;
+R = angle2rotmtx([0;0;(deg2rad(yaw))]);
+t = [tx; ty; tz];
+
+
+% extract Google FLP centric data with Tango VIO
+datasetDirectory = [datasetPath '/' datasetList(GoogleFLPIndex).name];
+GoogleFLPResult = extractGoogleFLPCentricData(datasetDirectory, R, t);
+locationDegree = [GoogleFLPResult(:).locationDegree];
+locationMeter = [GoogleFLPResult(:).locationMeter];
+trueLocation = [GoogleFLPResult(:).trueLocation];
+
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(locationDegree(2,:), locationDegree(1,:), 'b*-', 'LineWidth', 1); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+
+
+% plot horizontal position trajectory in global inertial frame (meter) - before
+figure;
+plot(trueLocation(1,:),trueLocation(2,:),'k*-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(locationMeter(1,:),locationMeter(2,:),'m*-','LineWidth',1.0); hold off;
+
+
+% manual coordinate alignment w.r.t. Tango's global inertial frame
+yaw = 68;
+R_FLP = angle2rotmtx([0;0;(deg2rad(yaw))]);
+R_FLP = R_FLP(1:2,1:2);
+t_FLP = GoogleFLPResult(1).trueLocation(1:2);
+t_startPoint = GoogleFLPResult(1).locationMeter;
+
+
+% transform to global inertial frame
+locationMeterTransformed = locationMeter - t_startPoint;
+locationMeterTransformed = (R_FLP * locationMeterTransformed + t_FLP);
+
+
+% plot horizontal position trajectory in global inertial frame (meter) - after
+figure;
+plot(trueLocation(1,:),trueLocation(2,:),'k*-','LineWidth',1.0); hold on; grid on; axis equal;
+plot(locationMeterTransformed(1,:),locationMeterTransformed(2,:),'m*-','LineWidth',1.0); hold off;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
