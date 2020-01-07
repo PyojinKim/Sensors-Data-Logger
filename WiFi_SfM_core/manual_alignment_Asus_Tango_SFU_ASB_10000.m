@@ -65,4 +65,18 @@ switch( expCase )
         ty = 0.4;
         tz = 0;
         
+    case 10
+        % 20200106_01_SFU_ASB
+        yaw = -2.3;
+        tx = 0.0;
+        ty = 0.3;
+        tz = 0;
+        
+    case 11
+        % 20200106_02_SFU_ASB
+        yaw = 178.5;
+        tx = 0.0;
+        ty = 0.0;
+        tz = 0;
+        
 end

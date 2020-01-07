@@ -82,6 +82,7 @@ end
 figure;
 plot([testWiFiScanResult(:).errorLocation]); grid on; axis tight;
 xlabel('WiFi Scan Location Index'); ylabel('Error Distance (m)');
+set(gcf,'Units','pixels','Position',[350 350 1280 480]);  % modify figure size
 
 
 % plot 3D arrow location error
@@ -160,13 +161,14 @@ ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
 figure;
 plot(trueLocation(1,:),trueLocation(2,:),'k*-','LineWidth',1.0); hold on; grid on; axis equal;
 plot(locationMeter(1,:),locationMeter(2,:),'m*-','LineWidth',1.0); hold off;
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10);
 
 
 % manual coordinate alignment w.r.t. Tango's global inertial frame
 yaw = 68;
 R_FLP = angle2rotmtx([0;0;(deg2rad(yaw))]);
 R_FLP = R_FLP(1:2,1:2);
-t_FLP = GoogleFLPResult(1).trueLocation(1:2);
+t_FLP = [10.0; 57.0];
 t_startPoint = GoogleFLPResult(1).locationMeter;
 
 
@@ -179,7 +181,43 @@ locationMeterTransformed = (R_FLP * locationMeterTransformed + t_FLP);
 figure;
 plot(trueLocation(1,:),trueLocation(2,:),'k*-','LineWidth',1.0); hold on; grid on; axis equal;
 plot(locationMeterTransformed(1,:),locationMeterTransformed(2,:),'m*-','LineWidth',1.0); hold off;
+xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10);
 
+
+%
+numGoogleFLP = size(GoogleFLPResult,2);
+for k = 1:numGoogleFLP
+    GoogleFLPResult(k).locationMeter = locationMeterTransformed(:,k);
+end
+
+
+for k = 1:numGoogleFLP
+    trueLocation = GoogleFLPResult(k).trueLocation(1:2);
+    FLPLocation = GoogleFLPResult(k).locationMeter(1:2);
+    GoogleFLPResult(k).errorLocation = norm(FLPLocation - trueLocation);
+end
+
+
+% plot Google FLP location error
+figure;
+plot([GoogleFLPResult(:).errorLocation]); grid on; axis tight;
+xlabel('Google FLP Location Index'); ylabel('Error Distance (m)');
+set(gcf,'Units','pixels','Position',[350 350 1280 480]);  % modify figure size
+
+
+% plot 3D arrow location error
+trueTrajectory = [GoogleFLPResult(:).trueLocation];
+FLPTrajectory = [GoogleFLPResult(:).locationMeter];
+figure;
+plot(trueTrajectory(1,:),trueTrajectory(2,:),'k*-','LineWidth',1.0); hold on; grid on;
+plot(FLPTrajectory(1,:),FLPTrajectory(2,:),'m*-','LineWidth',1.0);
+for k = 1:numGoogleFLP
+    trueLocation = [GoogleFLPResult(k).trueLocation(1:2); 0];
+    FLPLocation = [GoogleFLPResult(k).locationMeter(1:2); 0];
+    mArrow3(trueLocation, FLPLocation, 'color', 'red', 'stemWidth', 0.20);
+end
+plot_inertial_frame(0.5); axis equal; view(0,90);
+xlabel('x [m]'); ylabel('y [m]');
 
 
 

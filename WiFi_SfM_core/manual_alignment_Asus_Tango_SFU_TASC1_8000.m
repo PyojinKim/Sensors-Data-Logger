@@ -72,4 +72,11 @@ switch( expCase )
         ty = -0.7;
         tz = 0;
         
+    case 11
+        % 20200106_01_SFU_TASC1
+        yaw = -1.5;
+        tx = -0.5;
+        ty = -0.5;
+        tz = 0;
+        
 end

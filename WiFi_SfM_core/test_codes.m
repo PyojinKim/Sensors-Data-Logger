@@ -1,14 +1,29 @@
 
 
+clear x y
+HuberParameter = 10;
+x = 0:0.01:100;
+
+for i = 1:length(x)
+    y(i) = HuberFunction(x(i), HuberParameter);
+end
+
+figure;
+plot(x,y,'k','LineWidth',2.5); grid on; axis tight;
+xlabel('X - RSSI Value Difference'); ylabel('f(X) - the Huber function');
 
 
+clear x y
+TukeyParameter = 160;
+x = 0:0.01:170;
 
+for i = 1:length(x)
+    y(i) = TukeyFunction(x(i), TukeyParameter);
+end
 
-
-
-
-
-
+figure;
+plot(x,y,'k','LineWidth',2.5); grid on; axis tight;
+xlabel('X - Average RSSI Value'); ylabel('g(X) - the Tukey function');
 
 
 
