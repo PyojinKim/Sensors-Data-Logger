@@ -1,4 +1,90 @@
+%%
 
+wifiScanResult = parseWiFiTextFile('wifi.txt');
+
+
+GoogleFLPResult = parseGoogleFLPTextFile('FLP.txt');
+locationDegree = [GoogleFLPResult(:).locationDegree];
+
+
+% plot horizontal position (latitude / longitude) trajectory on Google map
+figure;
+plot(locationDegree(2,:), locationDegree(1,:), 'b*-', 'LineWidth', 1); hold on;
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',17);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',17);
+
+
+%% WiFi localization heat map figure
+
+% create figure frame for making video
+h_WiFi = figure(10);
+set(h_WiFi,'Color',[1 1 1]);
+set(h_WiFi,'Units','pixels','Position',[100 50 1800 900]);
+ha1 = axes('Position',[0.02,0.05 , 0.60,0.90]); % [x_start, y_start, x_width, y_width]
+ha2 = axes('Position',[0.68,0.25 , 0.30,0.50]); % [x_start, y_start, x_width, y_width]
+for queryIdx = 1:numTestWiFiScan
+    %% prerequisite to visualize
+    
+    % re-arrange WiFi scan location
+    maxRewardIndex = testWiFiScanResult(queryIdx).maxRewardIndex;
+    rewardResult = testWiFiScanResult(queryIdx).rewardResult;
+    errorLocation = testWiFiScanResult(queryIdx).errorLocation;
+    
+    databaseWiFiScanLocation = [wifiFingerprintDatabase(:).trueLocation];
+    trueLocation = testWiFiScanResult(queryIdx).trueLocation;
+    maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).trueLocation];
+    
+    
+    %% update WiFi scan location with distance (reward function) heat map
+    
+    axes(ha1); cla;
+    scatter3(databaseWiFiScanLocation(1,:),databaseWiFiScanLocation(2,:),databaseWiFiScanLocation(3,:),100,rewardResult,'.'); hold on; grid on;
+    plot3(trueLocation(1),trueLocation(2),trueLocation(3)+0.5,'kd','LineWidth',3);
+    plot3(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),maxRewardWiFiScanLocation(3,:)+0.5,'md','LineWidth',3);
+    colormap(jet); colorbar;
+    plot_inertial_frame(0.5); axis equal; view(158,47);
+    xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
+    
+    text(-10, -20, 0, sprintf('location error (m): %2.2f', errorLocation),'Color','k','FontSize',11,'FontWeight','bold');
+    
+    
+    %% update reward metric result
+    
+    axes(ha2); cla;
+    plot(rewardResult); grid on; axis tight;
+    xlabel('WiFi Scan Location Index in Fingerprint Database'); ylabel('Reward Metric');
+    
+    
+    % save images
+    pause(0.01); refresh;
+    saveImg = getframe(h_WiFi);
+    imwrite(saveImg.cdata , sprintf('figures/%06d.png', queryIdx));
+end
+
+
+%% make .avi file from png files
+
+movie = VideoWriter('myAVI.avi');
+movie.FrameRate = 2; % set fps
+open(movie);
+
+for queryIdx = 1:numTestWiFiScan
+    
+    % read PNG image file
+    filename = sprintf('figures/%06d.png', queryIdx);
+    im = imread(filename);
+    
+    % write video
+    writeVideo(movie, im);
+    
+    queryIdx
+end
+
+close(movie);
+
+
+%%
 
 clear x y
 HuberParameter = 10;
