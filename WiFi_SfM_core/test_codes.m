@@ -244,11 +244,15 @@ f = FigureRotator(gca());
 
 %% 2) plot all labeled WiFi scan locations from Tango VIO location
 
+% initialize various colors for figures
+distinguishableColors = distinguishable_colors(numDatasetList);
+
+
 % plot labeled WiFi scan locations
 figure; hold on; grid on;
 for k = 1:numDatasetList
-    wifiScanLocation = [datasetWiFiScanResult{k}.location];
-    plot3(wifiScanLocation(1,:),wifiScanLocation(2,:),wifiScanLocation(3,:),'color',distinguishableColors(k,:),'LineWidth',2);
+    wifiScanLocation = [datasetWiFiScanResult{k}.trueLocation];
+    plot3(wifiScanLocation(1,:),wifiScanLocation(2,:),wifiScanLocation(3,:),'d','color',distinguishableColors(k,:),'LineWidth',2);
 end
 plot_inertial_frame(0.5); axis equal; view(0,90);
 xlabel('x [m]','fontsize',10); ylabel('y [m]','fontsize',10); zlabel('z [m]','fontsize',10); hold off;
