@@ -1,3 +1,36 @@
+
+
+
+
+
+%% SFU_Multiple_Buildings_withVIO visualization / comparison
+
+datasetPath = 'G:\Google Drive\3_SFU_Postdoc____2019_2021\Smartphone_Dataset\4_WiFi_SfM\Asus_Tango\SFU_Multiple_Buildings_withVIO';
+datasetName = '\20200304125913R_WiFi_SfM';
+
+GoogleFLPResult = parseGoogleFLPTextFile([datasetPath datasetName '\FLP.txt']);
+locationDegree = [GoogleFLPResult(:).locationDegree];
+
+
+[TangoPoseResult] = parseTangoPoseTextFile([datasetPath datasetName '\pose.txt']);
+TangoLocation = [TangoPoseResult(:).stateEsti_Tango];
+TangoLocation = TangoLocation(1:2,:);
+
+
+% plot RoNIN 2D trajectory (left) & GPS trajectory on Google map (right)
+figure;
+subplot(1,2,1);
+plot(TangoLocation(1,:),TangoLocation(2,:),'k-','LineWidth',1.5); grid on; axis equal; axis tight;
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+subplot(1,2,2);
+plot(locationDegree(2,:), locationDegree(1,:),'b*-','LineWidth',1.0);
+plot_google_map('maptype', 'roadmap', 'APIKey', 'AIzaSyB_uD1rGjX6MJkoQgSDyjHkbdu-b-_5Bjg');
+xlabel('Longitude [deg]','FontName','Times New Roman','FontSize',15);
+ylabel('Latitude [deg]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[150 300 1700 600]);  % modify figure
+
+
 %%
 
 wifiScanResult = parseWiFiTextFile('wifi.txt');
