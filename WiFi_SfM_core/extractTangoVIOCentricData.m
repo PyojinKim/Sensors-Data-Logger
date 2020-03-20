@@ -26,7 +26,7 @@ for k = 1:numGoogleFLP
     
     % save Google FLP data in Tango VIO
     [timeDifference, indexTangoVIO] = min(abs(timestamp - TangoVIOTime));
-    if ((timeDifference < 0.1) && (accuracyMeter < accuracyThreshold))
+    if ((timeDifference < 0.5) && (accuracyMeter < accuracyThreshold))
         TangoVIO(indexTangoVIO).FLPLocationDegree = locationDegree;
         TangoVIO(indexTangoVIO).FLPLocationMeter = locationMeter;
         TangoVIO(indexTangoVIO).FLPAccuracyMeter = accuracyMeter;
