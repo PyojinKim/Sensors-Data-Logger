@@ -16,8 +16,7 @@ TangoVIOLocation = DriftCorrectedTangoVIOAbsoluteAngleModel(startLocation, rotat
 
 % (1) residuals for Google FLP location
 TangoEstimatedLocation = TangoVIOLocation(:,TangoGoogleFLPIndex);
-TangoLocationError = (TangoEstimatedLocation - TangoGoogleFLPLocation);
-TangoLocationNormError = vecnorm(TangoLocationError);
+TangoLocationNormError = vecnorm(TangoEstimatedLocation - TangoGoogleFLPLocation);
 residualGoogleFLP = max((TangoLocationNormError - TangoGoogleFLPAccuracy), 0);
 %residualGoogleFLP = vecnorm(TangoLocationError);
 
