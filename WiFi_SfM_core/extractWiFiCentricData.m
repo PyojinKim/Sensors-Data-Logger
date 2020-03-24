@@ -10,7 +10,7 @@ wifiScanResult = filterWiFiRSSI(wifiScanResult, -100);
 TangoPoseResult = parseTangoPoseTextFile([datasetDirectory '/pose.txt']);
 numPose = size(TangoPoseResult,2);
 for m = 1:numPose
-    transformedTangoPose = (R * TangoPoseResult(m).stateEsti_Tango(1:3) + t);
+    transformedTangoPose = (R * TangoPoseResult(m).stateEsti_Tango(1:2) + t);
     TangoPoseResult(m).stateEsti_Tango = transformedTangoPose;
 end
 
