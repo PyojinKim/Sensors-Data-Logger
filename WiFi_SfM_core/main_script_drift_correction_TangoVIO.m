@@ -84,26 +84,6 @@ for k = 1:numDatasetList
 end
 
 
-%% 3) optimize each Tango VIO against Google FLP
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

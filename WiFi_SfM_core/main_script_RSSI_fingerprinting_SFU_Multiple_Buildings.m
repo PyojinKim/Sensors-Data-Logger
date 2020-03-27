@@ -58,14 +58,14 @@ set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
 
 % construct WiFi fingerprint database
 wifiFingerprintDatabase = [];
-for k = 1:39
+for k = 1:48
     wifiFingerprintDatabase = [wifiFingerprintDatabase, datasetWiFiScanResult{k}];
 end
 
 
 % choose test WiFi scan dataset for WiFi localization
 testWiFiScanResult = [];
-for k = 40:55
+for k = 49:55
     testWiFiScanResult = [testWiFiScanResult, datasetWiFiScanResult{k}];
 end
 numTestWiFiScan = size(testWiFiScanResult,2);
@@ -231,7 +231,7 @@ end
 
 % choose test Google FLP data
 testGoogleFLPResult = [];
-for k = 40:55
+for k = 49:55
     testGoogleFLPResult = [testGoogleFLPResult, datasetGoogleFLPResult{k}];
 end
 numTestGoogleFLP = size(testGoogleFLPResult,2);
