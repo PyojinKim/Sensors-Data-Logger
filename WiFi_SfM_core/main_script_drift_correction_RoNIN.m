@@ -24,7 +24,7 @@ for k = 1:numDatasetList
     datasetDirectory = [datasetPath '\' datasetList(k).name];
     roninInterval = 200;          % 1 Hz
     roninYawRotation = 0;       % degree
-    RoninIO = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, 100.0);
+    RoninIO = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, 25.0);
     
     
     % save RoNIN IO
@@ -57,7 +57,7 @@ end
 
 %% 2) optimize each RoNIN IO against Google FLP
 
-%
+% initial 2D rigid body transformation w.r.t. Google FLP
 for k = 1:numDatasetList
     
     % current RoNIN IO data
@@ -88,12 +88,10 @@ for k = 1:numDatasetList
 end
 
 
-%% temporary
+%% temporary codes for testing idea
 
-
-
-k = 18;
-RoninIO = datasetRoninIO{k};
+datasetRoninIndex = 42;
+RoninIO = datasetRoninIO{datasetRoninIndex};
 
 
 %% (1) measurements (constants)
@@ -113,13 +111,6 @@ end
 RoninGoogleFLPLocation = [RoninIO.FLPLocationMeter];
 
 
-% check Google FLP data index
-if (isempty(RoninGoogleFLPIndex))
-    RoninIO = [];
-    return;
-end
-
-
 % sensor measurements from RoNIN IO, Google FLP
 sensorMeasurements.RoninPolarIODistance = [RoninPolarIO.distance];
 sensorMeasurements.RoninPolarIOAngle = [RoninPolarIO.angle];
@@ -127,9 +118,9 @@ sensorMeasurements.RoninGoogleFLPIndex = RoninGoogleFLPIndex;
 sensorMeasurements.RoninGoogleFLPLocation = RoninGoogleFLPLocation;
 sensorMeasurements.RoninGoogleFLPAccuracy = [RoninIO.FLPAccuracyMeter];
 
-sensorMeasurements.RoninStartLocation = landmark1;
-sensorMeasurements.RoninEndLocation = landmark2;
-sensorMeasurements.RoninAcceptableRadius = 2.0;
+sensorMeasurements.RoninStartLocation = landmark2;
+sensorMeasurements.RoninEndLocation = landmark4;
+sensorMeasurements.RoninAcceptableRadius = radius;
 
 
 %% (2) model parameters (variables) for RoNIN IO drift correction model
@@ -157,10 +148,15 @@ X_optimized = vec;
 RoninIOLocation = DriftCorrectedRoninIOAbsoluteAngleModel(startLocation, rotation, scale, bias, RoninPolarIODistance, RoninPolarIOAngle);
 
 
-% % save drift-corrected RoNIN IO location
-% for k = 1:numRoninIO
-%     RoninIO(k).location = RoninIOLocation(:,k);
-% end
+% save drift-corrected RoNIN IO location
+for k = 1:numRoninIO
+    RoninIO(k).location = RoninIOLocation(:,k);
+end
+datasetRoninIO{datasetRoninIndex} = RoninIO;
+
+
+
+
 
 
 
