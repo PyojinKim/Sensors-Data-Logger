@@ -55,6 +55,27 @@ for k = 1:numDatasetList
 end
 
 
+% label start and final FLP locations
+for k = 1:numDatasetList
+    
+    % read manual alignment result
+    expCase = k;
+    manual_alignment_Asus_Tango_SFU_Multiple_Buildings_Landmarks;
+    
+    
+    % update Tango VIO data
+    RoninIO = datasetRoninIO{k};
+    RoninIO(1).FLPLocationMeter = startFLPLocationMeter;
+    RoninIO(1).FLPAccuracyMeter = FLPAccuracyMeter;
+    RoninIO(end).FLPLocationMeter = finalFLPLocationMeter;
+    RoninIO(end).FLPAccuracyMeter = FLPAccuracyMeter;
+    
+    
+    % save Tango VIO
+    datasetRoninIO{k} = RoninIO;
+end
+
+
 %% 2) optimize each RoNIN IO against Google FLP
 
 % initial 2D rigid body transformation w.r.t. Google FLP

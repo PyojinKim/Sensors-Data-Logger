@@ -7,10 +7,6 @@ RoninGoogleFLPIndex = sensorMeasurements.RoninGoogleFLPIndex;
 RoninGoogleFLPLocation = sensorMeasurements.RoninGoogleFLPLocation;
 RoninGoogleFLPAccuracy = sensorMeasurements.RoninGoogleFLPAccuracy;
 
-RoninStartLocation = sensorMeasurements.RoninStartLocation;
-RoninEndLocation = sensorMeasurements.RoninEndLocation;
-RoninAcceptableRadius = sensorMeasurements.RoninAcceptableRadius;
-
 
 % Ronin IO drift correction model
 [startLocation, rotation, scale, bias] = unpackDriftCorrectionRoninIOModelParameters(X);
@@ -28,15 +24,9 @@ scaleRegularization = (scale - 1);
 biasRegularization = (bias - 0);
 
 
-% (3) residuals for landmarks
-RoninLocationNormError = [norm(RoninIOLocation(:,1) - RoninStartLocation), norm(RoninIOLocation(:,end) - RoninEndLocation)];
-residualLandmarks = max((RoninLocationNormError - [RoninAcceptableRadius, RoninAcceptableRadius]), 0);
-
-
-% (4) final residuals for nonlinear optimization
+% (3) final residuals for nonlinear optimization
 %residuals = [residualGoogleFLP, scaleRegularization, biasDifference].';
-residuals = [5*residualGoogleFLP, 5*residualLandmarks, scaleRegularization, biasRegularization].';
-%residuals = [residualGoogleFLP].';
+residuals = [10*residualGoogleFLP, scaleRegularization, biasRegularization].';
 
 
 end
