@@ -1,4 +1,4 @@
-function [residuals] = EuclideanDistanceResidual_GoogleFLP(sensorMeasurements, X)
+function [residuals] = EuclideanDistanceResidual_Tango_GoogleFLP_test(sensorMeasurements, X)
 
 % unpack sensor measurements
 TangoPolarVIODistance = sensorMeasurements.TangoPolarVIODistance;
@@ -6,7 +6,6 @@ TangoPolarVIOAngle = sensorMeasurements.TangoPolarVIOAngle;
 TangoGoogleFLPIndex = sensorMeasurements.TangoGoogleFLPIndex;
 TangoGoogleFLPLocation = sensorMeasurements.TangoGoogleFLPLocation;
 TangoGoogleFLPAccuracy = sensorMeasurements.TangoGoogleFLPAccuracy;
-%TangoGoogleFLPAccuracy = TangoGoogleFLPAccuracy - 10;
 
 
 % Tango VIO drift correction model
@@ -27,7 +26,7 @@ biasRegularization = (bias - 0);
 
 % (3) final residuals for nonlinear optimization
 %residuals = [residualGoogleFLP, scaleRegularization, biasDifference].';
-residuals = [residualGoogleFLP, scaleRegularization, biasRegularization].';
+residuals = [10*residualGoogleFLP, scaleRegularization, biasRegularization].';
 
 
 end

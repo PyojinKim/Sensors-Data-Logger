@@ -75,11 +75,11 @@ for k = testRoninIndex
     
     
     
-%     delete(h_text);
-%     h_text = text(-100, 50, 0, sprintf('%02d', k),'Color','k','FontSize',11,'FontWeight','bold');
+    %     delete(h_text);
+    %     h_text = text(-100, 50, 0, sprintf('%02d', k),'Color','k','FontSize',11,'FontWeight','bold');
     
     
-%     k
-%     pause(2)
+    %     k
+    %     pause(2)
 end
 

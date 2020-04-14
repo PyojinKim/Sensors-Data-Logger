@@ -29,23 +29,29 @@ sensorMeasurements.TangoGoogleFLPAccuracy = [TangoVIO.FLPAccuracyMeter];
 % initialize Tango VIO drift correction model parameters
 modelParameters.startLocation = TangoGoogleFLPLocation(:,1).';
 modelParameters.rotation = 0;
-modelParameters.scale = ones(1,numTangoVIO);
-modelParameters.bias = zeros(1,numTangoVIO);
-X_initial = [modelParameters.startLocation, modelParameters.rotation, modelParameters.scale, modelParameters.bias];
+X_initial = [modelParameters.startLocation, modelParameters.rotation];
+
+% modelParameters.scale = ones(1,numTangoVIO);
+% modelParameters.bias = zeros(1,numTangoVIO);
+% X_initial = [modelParameters.startLocation, modelParameters.rotation, modelParameters.scale, modelParameters.bias];
 
 
 %% (3) nonlinear optimization
 
 % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
 options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxIterations',400);
-[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual_GoogleFLP(sensorMeasurements, x),X_initial,[],[],options);
+[vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual_Tango_GoogleFLP(sensorMeasurements, x),X_initial,[],[],options);
 
 
 % optimal model parameters for Tango VIO drift correction model
 TangoPolarVIODistance = sensorMeasurements.TangoPolarVIODistance;
 TangoPolarVIOAngle = sensorMeasurements.TangoPolarVIOAngle;
 X_optimized = vec;
-[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X_optimized);
+%[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X_optimized);
+startLocation = X_optimized(1:2);
+rotation = X_optimized(3);
+scale = ones(1,numTangoVIO);
+bias = zeros(1,numTangoVIO);
 TangoVIOLocation = DriftCorrectedTangoVIOAbsoluteAngleModel(startLocation, rotation, scale, bias, TangoPolarVIODistance, TangoPolarVIOAngle);
 
 

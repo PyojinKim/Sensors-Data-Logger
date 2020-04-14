@@ -1,5 +1,42 @@
 
 
+% optimized Tango VIO visualization
+k = 2
+
+% current Tango VIO data
+TangoVIO = datasetTangoVIO{k};
+TangoVIOLocation = [TangoVIO.location];
+
+
+% plot Tango VIO location
+distinguishableColors = distinguishable_colors(numDatasetList);
+figure(10); hold on; grid on; axis equal; axis tight;
+plot(TangoVIOLocation(1,:),TangoVIOLocation(2,:),'-','color','b','LineWidth',1.5); grid on; axis equal;
+
+
+for m = 1:size(TangoVIO,2)
+    if (~isempty(TangoVIO(m).FLPLocationMeter))
+        
+        location = TangoVIO(m).location;
+        center = TangoVIO(m).FLPLocationMeter;
+        radius = TangoVIO(m).FLPAccuracyMeter;
+        
+        theta = [0:pi/50:2*pi];
+        x_circle = center(1) + radius * cos(theta);
+        y_circle = center(2) + radius * sin(theta);
+        plot(x_circle, y_circle,'color','m','LineWidth',1.0);
+        
+        plot([location(1) center(1)],[location(2) center(2)],'color','r','LineWidth',4.0);
+    end
+end
+
+
+xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+
+
+
 %% WiFi localization heat map video clip
 
 % create figure frame for making video
