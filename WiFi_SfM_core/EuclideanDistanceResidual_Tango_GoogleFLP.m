@@ -9,8 +9,7 @@ TangoGoogleFLPAccuracy = sensorMeasurements.TangoGoogleFLPAccuracy;
 
 
 % Tango VIO drift correction model
-%[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X);
-startLocation = X(1:2);
+startLocation = X(1:2).';
 rotation = X(3);
 numTangoVIO = size(TangoPolarVIODistance,2);
 scale = ones(1,numTangoVIO);

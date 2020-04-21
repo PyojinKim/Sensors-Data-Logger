@@ -16,6 +16,11 @@ end
 RoninGoogleFLPLocation = [RoninIO.FLPLocationMeter];
 
 
+% Google FLP offset for 2D rigid body rotation
+offset = RoninGoogleFLPLocation(:,1);
+RoninGoogleFLPLocation = RoninGoogleFLPLocation - offset;
+
+
 % check Google FLP data index
 if (isempty(RoninGoogleFLPIndex))
     RoninIO = [];
@@ -38,10 +43,6 @@ modelParameters.startLocation = RoninGoogleFLPLocation(:,1).';
 modelParameters.rotation = 0;
 X_initial = [modelParameters.startLocation, modelParameters.rotation];
 
-% modelParameters.scale = ones(1,numRoninIO);
-% modelParameters.bias = zeros(1,numRoninIO);
-% X_initial = [modelParameters.startLocation, modelParameters.rotation, modelParameters.scale, modelParameters.bias];
-
 
 %% (3) nonlinear optimization
 
@@ -54,12 +55,15 @@ options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','i
 RoninPolarIODistance = sensorMeasurements.RoninPolarIODistance;
 RoninPolarIOAngle = sensorMeasurements.RoninPolarIOAngle;
 X_optimized = vec;
-%[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X_optimized);
-startLocation = X_optimized(1:2);
+startLocation = X_optimized(1:2).';
 rotation = X_optimized(3);
 scale = ones(1,numRoninIO);
 bias = zeros(1,numRoninIO);
 RoninIOLocation = DriftCorrectedRoninIOAbsoluteAngleModel(startLocation, rotation, scale, bias, RoninPolarIODistance, RoninPolarIOAngle);
+
+
+% Google FLP offset for 2D rigid body rotation
+RoninIOLocation = RoninIOLocation + offset;
 
 
 % save drift-corrected RoNIN IO location

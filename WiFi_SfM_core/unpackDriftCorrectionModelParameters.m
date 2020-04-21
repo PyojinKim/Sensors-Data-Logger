@@ -1,7 +1,7 @@
 function [startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X_Model_Parameters)
 
 % start location and rotation
-startLocation = X_Model_Parameters(1:2);
+startLocation = X_Model_Parameters(1:2).';
 rotation = X_Model_Parameters(3);
 
 

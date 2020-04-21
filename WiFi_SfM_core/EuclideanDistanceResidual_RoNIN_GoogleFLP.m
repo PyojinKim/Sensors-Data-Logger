@@ -9,8 +9,7 @@ RoninGoogleFLPAccuracy = sensorMeasurements.RoninGoogleFLPAccuracy;
 
 
 % Ronin IO drift correction model
-%[startLocation, rotation, scale, bias] = unpackDriftCorrectionModelParameters(X);
-startLocation = X(1:2);
+startLocation = X(1:2).';
 rotation = X(3);
 numRoninIO = size(RoninPolarIODistance,2);
 scale = ones(1,numRoninIO);

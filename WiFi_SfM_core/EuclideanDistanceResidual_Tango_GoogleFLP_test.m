@@ -26,7 +26,7 @@ biasRegularization = (bias - 0);
 
 % (3) final residuals for nonlinear optimization
 %residuals = [residualGoogleFLP, scaleRegularization, biasDifference].';
-residuals = [10*residualGoogleFLP, scaleRegularization, biasRegularization].';
+residuals = [3*residualGoogleFLP, scaleRegularization, biasRegularization].';
 
 
 end

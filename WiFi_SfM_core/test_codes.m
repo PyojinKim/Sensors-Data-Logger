@@ -1,5 +1,91 @@
 
 
+
+
+%% temporary codes for testing idea
+
+for datasetRoninIndex = 1:numDatasetList
+    
+    RoninIO = datasetRoninIO{datasetRoninIndex};
+    
+    
+    %% (1) measurements (constants)
+    
+    % RoNIN IO constraints (relative movement)
+    RoninPolarIO = convertRoninPolarCoordinate(RoninIO);
+    numRoninIO = size(RoninPolarIO,2);
+    
+    
+    % Google FLP constraints (global location)
+    RoninGoogleFLPIndex = [];
+    for k = 1:numRoninIO
+        if (~isempty(RoninIO(k).FLPLocationMeter))
+            RoninGoogleFLPIndex = [RoninGoogleFLPIndex, k];
+        end
+    end
+    RoninGoogleFLPLocation = [RoninIO.FLPLocationMeter];
+    
+    
+    % sensor measurements from RoNIN IO, Google FLP
+    sensorMeasurements.RoninPolarIODistance = [RoninPolarIO.distance];
+    sensorMeasurements.RoninPolarIOAngle = [RoninPolarIO.angle];
+    sensorMeasurements.RoninGoogleFLPIndex = RoninGoogleFLPIndex;
+    sensorMeasurements.RoninGoogleFLPLocation = RoninGoogleFLPLocation;
+    sensorMeasurements.RoninGoogleFLPAccuracy = [RoninIO.FLPAccuracyMeter];
+    
+    
+    %% (2) model parameters (variables) for RoNIN IO drift correction model
+    
+    % initialize RoNIN IO drift correction model parameters
+    modelParameters.startLocation = RoninGoogleFLPLocation(:,1).';
+    modelParameters.rotation = 0;
+    modelParameters.scale = ones(1,numRoninIO);
+    modelParameters.bias = zeros(1,numRoninIO);
+    X_initial = [modelParameters.startLocation, modelParameters.rotation, modelParameters.scale, modelParameters.bias];
+    
+    
+    %% (3) nonlinear optimization
+    
+    % run nonlinear optimization using lsqnonlin in Matlab (Levenberg-Marquardt)
+    options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxIterations',400);
+    [vec,resnorm,residuals,exitflag] = lsqnonlin(@(x) EuclideanDistanceResidual_RoNIN_GoogleFLP_test(sensorMeasurements, x),X_initial,[],[],options);
+    
+    
+    % optimal model parameters for RoNIN IO drift correction model
+    RoninPolarIODistance = sensorMeasurements.RoninPolarIODistance;
+    RoninPolarIOAngle = sensorMeasurements.RoninPolarIOAngle;
+    X_optimized = vec;
+    [startLocation, rotation, scale, bias] = unpackDriftCorrectionRoninIOModelParameters(X_optimized);
+    RoninIOLocation = DriftCorrectedRoninIOAbsoluteAngleModel(startLocation, rotation, scale, bias, RoninPolarIODistance, RoninPolarIOAngle);
+    
+    
+    % save drift-corrected RoNIN IO location
+    for k = 1:numRoninIO
+        RoninIO(k).location = RoninIOLocation(:,k);
+    end
+    datasetRoninIO{datasetRoninIndex} = RoninIO;
+end
+
+
+% optimized RoNIN IO visualization
+for k = 1:numDatasetList
+    
+    % current RoNIN IO data
+    RoninIO = datasetRoninIO{k};
+    RoninIOLocation = [RoninIO.location];
+    
+    
+    % plot RoNIN IO location
+    distinguishableColors = distinguishable_colors(numDatasetList);
+    figure(10); hold on; grid on; axis equal; axis tight;
+    plot(RoninIOLocation(1,:),RoninIOLocation(2,:),'-','color',distinguishableColors(k,:),'LineWidth',1.5); grid on; axis equal;
+    xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+    ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+    set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+end
+
+%%
+
 % optimized Tango VIO visualization
 k = 2
 

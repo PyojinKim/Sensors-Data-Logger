@@ -8,7 +8,7 @@ landmark3 = [-259.7510; 251.4445];
 landmark4 = [-157.3795; 312.6015];
 landmark5 = [147.9625; 236.8200];
 landmark6 = [177.2116; 144.6412];
-radius = 2.5;
+radius = 1.5;
 
 
 switch( expCase )
