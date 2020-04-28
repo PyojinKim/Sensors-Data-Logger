@@ -29,6 +29,7 @@ for k = 1:numDatasetList
     
     % save Tango VIO
     datasetTangoVIO{k} = TangoVIO;
+    k
 end
 
 

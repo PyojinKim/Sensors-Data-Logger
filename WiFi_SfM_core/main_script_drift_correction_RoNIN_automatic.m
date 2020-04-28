@@ -111,14 +111,27 @@ end
 
 %% temporary codes for testing idea
 
-datasetRoninIndex = 42;
-RoninIO = datasetRoninIO{datasetRoninIndex};
+%
+for k = 1:numDatasetList
+    
+    % current Tango VIO data
+    RoninIO = datasetRoninIO{k};
+    
+    
+    % nonlinear optimization with Tango VIO drift correction model
+    [RoninIO] = optimizeEachRoninIOwithScaleBias(RoninIO);
+    datasetRoninIO{k} = RoninIO;
+end
 
 
 
 
 
-datasetRoninIO{datasetRoninIndex} = RoninIO;
+
+
+
+
+
 
 
 

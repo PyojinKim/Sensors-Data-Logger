@@ -4,6 +4,7 @@ function [RoninIO] = extractRoninCentricData(datasetDirectory, roninInterval, ro
 RoninIO = parseRoninTextFile([datasetDirectory '/ronin.txt'], roninInterval, roninYawRotation);
 RoninIO = computeRoninVelocity(RoninIO);
 RoninIOTime = [RoninIO.timestamp];
+numRoninIO = size(RoninIO,2);
 
 
 % parse wifi.txt file / find the closest WiFi Scan data
@@ -53,6 +54,28 @@ for k = 1:numRonin
         RoninIO(k).FLPLocationDegree = [];
         RoninIO(k).FLPLocationMeter = [];
         RoninIO(k).FLPAccuracyMeter = [];
+    end
+end
+
+
+% parse magnet.txt file / find the closest magnetic field data
+magnet = parseMagnetTextFile([datasetDirectory '/magnet.txt']);
+magnetTime = [magnet.timestamp];
+for k = 1:numRoninIO
+    [timeDifference, indexMagnet] = min(abs(RoninIO(k).timestamp - magnetTime));
+    if (timeDifference < 0.5)
+        RoninIO(k).magnet = magnet(indexMagnet).magnet;
+    end
+end
+
+
+% parse game_rv.txt file / find the closest game rotation vector (R_gb)
+gameRV = parseGameRVTextFile([datasetDirectory '/game_rv.txt']);
+gameRVTime = [gameRV.timestamp];
+for k = 1:numRoninIO
+    [timeDifference, indexGameRV] = min(abs(RoninIO(k).timestamp - gameRVTime));
+    if (timeDifference < 0.5)
+        RoninIO(k).R_gb = gameRV(indexGameRV).R_gb;
     end
 end
 

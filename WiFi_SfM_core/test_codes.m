@@ -1,5 +1,44 @@
 
 
+
+%% magnetic field visualization
+
+
+k = 32;
+
+
+% current Tango VIO data
+TangoVIO = datasetTangoVIO{k};
+numTangoVIO = size(TangoVIO,2);
+
+
+% draw Tango VIO trajectory
+TangoVIOLocation = [TangoVIO.location];
+TangoVIOLocation = [TangoVIOLocation; zeros(1,numTangoVIO)];
+
+
+figure;
+plot3(TangoVIOLocation(1,:), TangoVIOLocation(2,:), TangoVIOLocation(3,:), 'm', 'LineWidth', 2); hold on; grid on; axis equal;
+for m = 1:2:numTangoVIO
+    % draw magnetic field vectors
+    currentPosition = [TangoVIO(m).location;0];
+    currentMagnet = TangoVIO(m).R_gb * TangoVIO(m).magnet;
+    currentMagnet = currentMagnet / 5;
+    
+    plot_magnetic_field_vector(currentPosition, currentMagnet, 'b', 1.0);
+end
+title(sprintf('Index: %02d', k))
+
+
+
+% figure options
+f = FigureRotator(gca());
+
+
+%%
+
+
+
 % Google FLP visualization
 for k = 1:numDatasetList
     
