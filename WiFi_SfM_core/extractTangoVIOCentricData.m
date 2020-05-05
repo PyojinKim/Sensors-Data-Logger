@@ -1,4 +1,4 @@
-function [TangoVIO] = extractTangoVIOCentricData(datasetDirectory, TangoVIOInterval, accuracyThreshold)
+function [TangoVIO] = extractTangoVIOCentricData(datasetDirectory, TangoVIOInterval, accuracyThreshold, uniqueWiFiAPsBSSID)
 
 % parse pose.txt
 TangoVIOFull = parseTangoPoseTextFile([datasetDirectory '/pose.txt']);
@@ -53,6 +53,27 @@ for k = 1:numTangoVIO
     [timeDifference, indexGameRV] = min(abs(TangoVIO(k).timestamp - gameRVTime));
     if (timeDifference < 0.5)
         TangoVIO(k).R_gb = gameRV(indexGameRV).R_gb;
+    end
+end
+
+
+% parse wifi.txt file / vectorize WiFi RSSI for each WiFi scan
+wifiScan = parseWiFiTextFile([datasetDirectory '/wifi.txt']);
+wifiScan = vectorizeWiFiRSSI(wifiScan, uniqueWiFiAPsBSSID);
+wifiScan = filterWiFiRSSI(wifiScan, -100);
+numWifiScan = size(wifiScan,2);
+TangoVIOTime = [TangoVIO.timestamp];
+for k = 1:numWifiScan
+    
+    % current WiFi scan data
+    timestamp = wifiScan(k).timestamp;
+    RSSI = wifiScan(k).RSSI;
+    
+    
+    % save WiFi scan data in Tango VIO
+    [timeDifference, indexTangoVIO] = min(abs(timestamp - TangoVIOTime));
+    if (timeDifference < 0.5)
+        TangoVIO(indexTangoVIO).RSSI = RSSI;
     end
 end
 

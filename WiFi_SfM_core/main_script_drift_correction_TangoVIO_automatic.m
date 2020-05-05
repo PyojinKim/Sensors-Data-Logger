@@ -15,6 +15,10 @@ datasetList = dir(datasetPath);
 datasetList(1:2) = [];
 
 
+% load unique WiFi RSSID Map
+load([datasetPath '/uniqueWiFiAPsBSSID.mat']);
+
+
 % load Tango VIO data
 numDatasetList = 55;
 datasetTangoVIO = cell(1,numDatasetList);
@@ -24,7 +28,7 @@ for k = 1:numDatasetList
     datasetDirectory = [datasetPath '\' datasetList(k).name];
     TangoVIOInterval = 100;   % 200 Hz
     accuracyThreshold = 25;   % in meter
-    TangoVIO = extractTangoVIOCentricData(datasetDirectory, TangoVIOInterval, accuracyThreshold);
+    TangoVIO = extractTangoVIOCentricData(datasetDirectory, TangoVIOInterval, accuracyThreshold, uniqueWiFiAPsBSSID);
     
     
     % save Tango VIO
@@ -102,7 +106,7 @@ for k = 1:numDatasetList
     % plot Tango VIO location
     distinguishableColors = distinguishable_colors(numDatasetList);
     figure(10); hold on; grid on; axis equal; axis tight;
-    plot(TangoVIOLocation(1,:),TangoVIOLocation(2,:),'*-','color',distinguishableColors(k,:),'LineWidth',1.5); grid on; axis equal;
+    plot(TangoVIOLocation(1,:),TangoVIOLocation(2,:),'-','color',distinguishableColors(k,:),'LineWidth',1.5); grid on; axis equal;
     xlabel('X [m]','FontName','Times New Roman','FontSize',15);
     ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
     set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
@@ -124,12 +128,121 @@ for k = 1:numDatasetList
 end
 
 
+%% temporary codes for WiFi similarity visualization
+
+k = 2;
+
+% current Tango VIO data
+TangoVIO = datasetTangoVIO{k};
+numTangoVIO = size(TangoVIO,2);
+testWiFiScanResult = struct('timestamp',cell(1,numTangoVIO),'RSSI',cell(1,numTangoVIO),'trueLocation',cell(1,numTangoVIO));
+numCount = 0;
+for m = 1:numTangoVIO
+    
+    % check WiFi scan RSSI exist or not
+    if (~isempty(TangoVIO(m).RSSI))
+        
+        numCount = numCount + 1;
+        testWiFiScanResult(numCount).timestamp = TangoVIO(m).timestamp;
+        testWiFiScanResult(numCount).RSSI = TangoVIO(m).RSSI;
+        testWiFiScanResult(numCount).trueLocation = TangoVIO(m).location;
+    end
+end
+testWiFiScanResult((numCount+1):end) = [];
 
 
+testRoninIndex = [7 17 22 25 41];
+
+% construct WiFi fingerprint database
+wifiFingerprintDatabase = [];
+for k = testRoninIndex
+    
+    % current Tango VIO data
+    TangoVIO = datasetTangoVIO{k};
+    numTangoVIO = size(TangoVIO,2);
+    tempWiFiScanResult = struct('timestamp',cell(1,numTangoVIO),'RSSI',cell(1,numTangoVIO),'trueLocation',cell(1,numTangoVIO));
+    numCount = 0;
+    for m = 1:numTangoVIO
+        
+        % check WiFi scan RSSI exist or not
+        if (~isempty(TangoVIO(m).RSSI))
+            
+            numCount = numCount + 1;
+            tempWiFiScanResult(numCount).timestamp = TangoVIO(m).timestamp;
+            tempWiFiScanResult(numCount).RSSI = TangoVIO(m).RSSI;
+            tempWiFiScanResult(numCount).trueLocation = TangoVIO(m).location;
+        end
+    end
+    tempWiFiScanResult((numCount+1):end) = [];
+    
+    
+    % save WiFi scan results
+    wifiFingerprintDatabase = [wifiFingerprintDatabase, tempWiFiScanResult];
+end
 
 
+numTestWiFiScan = size(testWiFiScanResult,2);
+for queryIndex = 1:numTestWiFiScan
+    
+    % current RSSI vector and true position from Tango VIO
+    queryRSSI = testWiFiScanResult(queryIndex).RSSI;
+    trueLocation = testWiFiScanResult(queryIndex).trueLocation;
+    
+    % query RSSI vector against WiFi fingerprint database
+    [queryLocation, maxRewardIndex, rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
+    
+    % save the query result
+    testWiFiScanResult(queryIndex).queryLocation = queryLocation;
+    testWiFiScanResult(queryIndex).maxRewardIndex = maxRewardIndex;
+    testWiFiScanResult(queryIndex).rewardResult = rewardResult;
+    testWiFiScanResult(queryIndex).errorLocation = norm(queryLocation - trueLocation);
+end
 
 
+%% heat map plot
+
+% re-arrange WiFi scan location
+queryIndex = 25;
+rewardResult = testWiFiScanResult(queryIndex).rewardResult;
+maxRewardIndex = testWiFiScanResult(queryIndex).maxRewardIndex;
+trueLocation = testWiFiScanResult(queryIndex).trueLocation;
+
+databaseWiFiScanLocation = [wifiFingerprintDatabase(:).trueLocation];
+maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).trueLocation];
+
+
+% plot WiFi scan location with distance (reward function) heat map
+figure;
+scatter(databaseWiFiScanLocation(1,:),databaseWiFiScanLocation(2,:),100,rewardResult,'.'); hold on; grid on;
+
+
+testRoninIndex = [2 7 17 22 25 41];
+for k = testRoninIndex
+    
+    % current Tango VIO data
+    TangoVIO = datasetTangoVIO{k};
+    TangoVIOLocation = [TangoVIO.location];
+    
+    
+    % plot Tango VIO location
+    distinguishableColors = distinguishable_colors(numDatasetList);
+    plot(TangoVIOLocation(1,:),TangoVIOLocation(2,:),'-','color','k','LineWidth',0.5); grid on; axis equal;
+    xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+    ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+end
+
+
+plot(trueLocation(1),trueLocation(2),'kd','LineWidth',3);
+plot(maxRewardWiFiScanLocation(1,:),maxRewardWiFiScanLocation(2,:),'md','LineWidth',3);
+colormap(jet); colorbar;
+xlabel('x [m]'); ylabel('y [m]'); axis equal; axis tight;
+set(gcf,'Units','pixels','Position',[150 60 1700 900]);  % modify figure
+
+
+% plot reward metric result
+figure;
+plot(rewardResult); grid on; axis tight;
+xlabel('WiFi Scan Location Index in Fingerprint Database'); ylabel('Reward Metric');
 
 
 
