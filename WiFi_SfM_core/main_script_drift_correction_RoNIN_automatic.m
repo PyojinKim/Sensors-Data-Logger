@@ -15,6 +15,10 @@ datasetList = dir(datasetPath);
 datasetList(1:2) = [];
 
 
+% load unique WiFi RSSID Map
+load([datasetPath '/uniqueWiFiAPsBSSID.mat']);
+
+
 % load RoNIN IO data
 numDatasetList = 55;
 datasetRoninIO = cell(1,numDatasetList);
@@ -24,7 +28,7 @@ for k = 1:numDatasetList
     datasetDirectory = [datasetPath '\' datasetList(k).name];
     roninInterval = 200;          % 1 Hz
     roninYawRotation = 0;       % degree
-    RoninIO = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, 25.0);
+    RoninIO = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, 25.0, uniqueWiFiAPsBSSID);
     
     
     % save RoNIN IO
@@ -63,7 +67,7 @@ for k = 1:numDatasetList
     manual_alignment_Asus_Tango_SFU_Multiple_Buildings_Landmarks;
     
     
-    % update Tango VIO data
+    % update RoNIN IO data
     RoninIO = datasetRoninIO{k};
     RoninIO(1).FLPLocationMeter = startFLPLocationMeter;
     RoninIO(1).FLPAccuracyMeter = FLPAccuracyMeter;
@@ -71,7 +75,7 @@ for k = 1:numDatasetList
     RoninIO(end).FLPAccuracyMeter = FLPAccuracyMeter;
     
     
-    % save Tango VIO
+    % save RoNIN IO
     datasetRoninIO{k} = RoninIO;
 end
 
@@ -114,16 +118,85 @@ end
 %
 for k = 1:numDatasetList
     
-    % current Tango VIO data
+    % current RoNIN IO data
     RoninIO = datasetRoninIO{k};
     
     
-    % nonlinear optimization with Tango VIO drift correction model
+    % nonlinear optimization with RoNIN IO drift correction model
     [RoninIO] = optimizeEachRoninIOwithScaleBias(RoninIO);
     datasetRoninIO{k} = RoninIO;
 end
 
 
+%% temporary codes for WiFi similarity visualization
+
+k = 1;
+
+% current RoNIN IO data
+RoninIO = datasetRoninIO{k};
+numRoninIO = size(RoninIO,2);
+testWiFiScanResult = struct('timestamp',cell(1,numRoninIO),'RSSI',cell(1,numRoninIO),'trueLocation',cell(1,numRoninIO));
+numCount = 0;
+for m = 1:numRoninIO
+    
+    % check WiFi scan RSSI exist or not
+    if (~isempty(RoninIO(m).RSSI))
+        
+        numCount = numCount + 1;
+        testWiFiScanResult(numCount).timestamp = RoninIO(m).timestamp;
+        testWiFiScanResult(numCount).RSSI = RoninIO(m).RSSI;
+        testWiFiScanResult(numCount).trueLocation = RoninIO(m).location;
+    end
+end
+testWiFiScanResult((numCount+1):end) = [];
+
+
+testRoninIndex = [8 9 16 26 27 39 40 48];
+
+% construct WiFi fingerprint database
+wifiFingerprintDatabase = [];
+for k = testRoninIndex
+    
+    % current RoNIN IO data
+    RoninIO = datasetRoninIO{k};
+    numRoninIO = size(RoninIO,2);
+    tempWiFiScanResult = struct('timestamp',cell(1,numRoninIO),'RSSI',cell(1,numRoninIO),'trueLocation',cell(1,numRoninIO));
+    numCount = 0;
+    for m = 1:numRoninIO
+        
+        % check WiFi scan RSSI exist or not
+        if (~isempty(RoninIO(m).RSSI))
+            
+            numCount = numCount + 1;
+            tempWiFiScanResult(numCount).timestamp = RoninIO(m).timestamp;
+            tempWiFiScanResult(numCount).RSSI = RoninIO(m).RSSI;
+            tempWiFiScanResult(numCount).trueLocation = RoninIO(m).location;
+        end
+    end
+    tempWiFiScanResult((numCount+1):end) = [];
+    
+    
+    % save WiFi scan results
+    wifiFingerprintDatabase = [wifiFingerprintDatabase, tempWiFiScanResult];
+end
+
+
+numTestWiFiScan = size(testWiFiScanResult,2);
+for queryIndex = 1:numTestWiFiScan
+    
+    % current RSSI vector and true position from RoNIN IO
+    queryRSSI = testWiFiScanResult(queryIndex).RSSI;
+    trueLocation = testWiFiScanResult(queryIndex).trueLocation;
+    
+    % query RSSI vector against WiFi fingerprint database
+    [queryLocation, maxRewardIndex, rewardResult] = queryWiFiRSSI(queryRSSI, wifiFingerprintDatabase);
+    
+    % save the query result
+    testWiFiScanResult(queryIndex).queryLocation = queryLocation;
+    testWiFiScanResult(queryIndex).maxRewardIndex = maxRewardIndex;
+    testWiFiScanResult(queryIndex).rewardResult = rewardResult;
+    testWiFiScanResult(queryIndex).errorLocation = norm(queryLocation - trueLocation);
+end
 
 
 

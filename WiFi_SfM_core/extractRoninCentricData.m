@@ -1,4 +1,4 @@
-function [RoninIO] = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, accuracyThreshold)
+function [RoninIO] = extractRoninCentricData(datasetDirectory, roninInterval, roninYawRotation, accuracyThreshold, uniqueWiFiAPsBSSID)
 
 % parse ronin.txt file / compute RoNIN velocity and speed
 RoninIO = parseRoninTextFile([datasetDirectory '/ronin.txt'], roninInterval, roninYawRotation);
@@ -76,6 +76,27 @@ for k = 1:numRoninIO
     [timeDifference, indexGameRV] = min(abs(RoninIO(k).timestamp - gameRVTime));
     if (timeDifference < 0.5)
         RoninIO(k).R_gb = gameRV(indexGameRV).R_gb;
+    end
+end
+
+
+% parse wifi.txt file / vectorize WiFi RSSI for each WiFi scan
+wifiScan = parseWiFiTextFile([datasetDirectory '/wifi.txt']);
+wifiScan = vectorizeWiFiRSSI(wifiScan, uniqueWiFiAPsBSSID);
+wifiScan = filterWiFiRSSI(wifiScan, -100);
+numWifiScan = size(wifiScan,2);
+RoninIOTime = [RoninIO.timestamp];
+for k = 1:numWifiScan
+    
+    % current WiFi scan data
+    timestamp = wifiScan(k).timestamp;
+    RSSI = wifiScan(k).RSSI;
+    
+    
+    % save WiFi scan data in RoNIN IO
+    [timeDifference, indexRoninIO] = min(abs(timestamp - RoninIOTime));
+    if (timeDifference < 0.5)
+        RoninIO(indexRoninIO).RSSI = RSSI;
     end
 end
 
