@@ -130,7 +130,7 @@ end
 
 %% temporary codes for WiFi similarity visualization
 
-k = 1;
+k = 3;
 
 % current RoNIN IO data
 RoninIO = datasetRoninIO{k};
@@ -151,7 +151,7 @@ end
 testWiFiScanResult((numCount+1):end) = [];
 
 
-testRoninIndex = [8 9 16 26 27 39 40 48];
+testRoninIndex = [4 18 31 42];
 
 % construct WiFi fingerprint database
 wifiFingerprintDatabase = [];
@@ -199,6 +199,29 @@ for queryIndex = 1:numTestWiFiScan
 end
 
 
+%% average WiFi localization
+
+
+segment1 = [];
+segment2 = [];
+segment3 = [];
+segment4 = [];
+segment5 = [];
+
+for queryIdx = 1:numTestWiFiScan
+    %% prerequisite to visualize
+    
+    % re-arrange WiFi scan location
+    maxRewardIndex = testWiFiScanResult(queryIdx).maxRewardIndex;
+    trueLocation = testWiFiScanResult(queryIdx).trueLocation;
+    maxRewardWiFiScanLocation = [wifiFingerprintDatabase(maxRewardIndex).trueLocation];
+    
+    % average WiFi location
+    meanLocation = mean([trueLocation, maxRewardWiFiScanLocation],2);
+    
+    % accumulate average WiFi location
+    segment5 = [segment5, meanLocation];
+end
 
 
 

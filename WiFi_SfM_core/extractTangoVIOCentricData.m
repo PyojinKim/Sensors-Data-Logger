@@ -78,4 +78,13 @@ for k = 1:numWifiScan
 end
 
 
+% add dummy WiFi RSSI vector
+numTangoVIO = size(TangoVIO,2);
+for k = 1:numTangoVIO
+    if (isempty(TangoVIO(k).RSSI))
+        TangoVIO(k).RSSI = -200 * ones(1179,1);
+    end
+end
+
+
 end
