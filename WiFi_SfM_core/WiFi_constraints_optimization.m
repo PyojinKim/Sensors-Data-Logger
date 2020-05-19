@@ -153,10 +153,86 @@ for k = 1:numRoninData
 end
 
 
+%% WiFi raw matches visualization
+
+%
+TangoVIO = partialTangoVIO{1};
 
 
-
-
+%
+count = 0;
+h_WiFi = figure(10);
+for k = 1:size(TangoVIO,2)
+    
+    cla;
+    
+    
+    % plot Tango VIO trajectories
+    for n = 1:numRoninData
+        
+        % current Tango VIO data
+        TangoVIO = partialTangoVIO{n};
+        TangoVIOLocation = [TangoVIO.location];
+        
+        % plot Tango VIO location
+        distinguishableColors = distinguishable_colors(numDatasetList);
+        plot(TangoVIOLocation(1,:),TangoVIOLocation(2,:),'-','color',distinguishableColors(n,:),'LineWidth',1.5); hold on; grid on; axis equal;
+        xlabel('X [m]','FontName','Times New Roman','FontSize',15);
+        ylabel('Y [m]','FontName','Times New Roman','FontSize',15);
+    end
+    
+    
+    % plot WiFi frames on Tango VIO trajectories
+    for n = 1:numRoninData
+        
+        % current Tango VIO RSSI data
+        TangoVIO = partialTangoVIO{n};
+        TangoVIOofRSSI = [TangoVIO.RSSI];
+        for m = 1:size(TangoVIOofRSSI,2)
+            RSSI = TangoVIOofRSSI(:,m);
+            if (sum(RSSI == -200) == 1179)
+                continue;
+            else
+                scatter(TangoVIO(m).location(1),TangoVIO(m).location(2),150,'k.');
+            end
+        end
+    end
+    
+    
+    % plot WiFi raw match results
+    TangoVIO = partialTangoVIO{1};
+    if (~isempty(TangoVIO(k).WiFiIndex))
+        
+        % plot WiFi uncertainty radius on current location
+        centerLocation = TangoVIO(k).location;
+        plot_uncertainty_radius(centerLocation, 10.0, 'r', 2.0);
+        
+        
+        % plot WiFi matching results
+        WiFiIndex = TangoVIO(k).WiFiIndex;
+        for m = 2:numRoninData
+            
+            % 2D query and estimated location
+            queryLocation = TangoVIO(k).location;
+            estimatedLocation = partialTangoVIO{m}(WiFiIndex(m)).location;
+            errorLocation = norm(queryLocation - estimatedLocation);
+            midPoint = (queryLocation + estimatedLocation) / 2;
+            
+            % plot current status
+            line([queryLocation(1) estimatedLocation(1)], [queryLocation(2) estimatedLocation(2)],'color','k','LineWidth',2.5);
+            scatter(queryLocation(1),queryLocation(2),800,'m.');
+            scatter(estimatedLocation(1),estimatedLocation(2),800,'k.');
+            %text(midPoint(1)+0.2, midPoint(2)+0.2, 0, sprintf('%2.2f (m)', errorLocation),'Color','k','FontSize',11,'FontWeight','bold');
+        end
+        
+        % save images
+        count = count + 1;
+        pause(0.01); refresh;
+        saveImg = getframe(h_WiFi);
+        imwrite(saveImg.cdata , sprintf('figures/%06d.png', count));
+        
+    end
+end
 
 
 %%
