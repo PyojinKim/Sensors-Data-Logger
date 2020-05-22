@@ -101,6 +101,15 @@ for k = 1:numWifiScan
 end
 
 
+% add dummy WiFi RSSI vector
+numRoninIO = size(RoninIO,2);
+for k = 1:numRoninIO
+    if (isempty(RoninIO(k).RSSI))
+        RoninIO(k).RSSI = -200 * ones(1179,1);
+    end
+end
+
+
 end
 
 
