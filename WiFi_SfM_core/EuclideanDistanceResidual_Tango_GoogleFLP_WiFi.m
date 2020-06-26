@@ -49,12 +49,13 @@ for k = 1:numWiFiConstraints
     end
 end
 TangoLocationNormError = TangoLocationNormError(:).';
-residualWiFi = max((TangoLocationNormError - 5.0), 0);
+residualWiFi = max((TangoLocationNormError - 0.0), 0);
 
 
 % (3) final residuals for nonlinear optimization
 %residuals = [residualWiFi];
 residuals = [residualGoogleFLP, residualWiFi];
+residuals = lossFunction(residuals.^2, 'Cauchy');
 
 
 end
